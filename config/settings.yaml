@@ -1,6 +1,6 @@
 # API Configuration
 anthropic:
-  api_key: ${ANTHROPIC_API_KEY}  # Set via environment variable
+  api_key: ${ANTHROPIC_API_KEY} # Set via environment variable
   model: "claude-3-5-sonnet-20241022"
   max_tokens: 2000
   temperature: 0.7
@@ -15,8 +15,8 @@ browser:
 # Kleinanzeigen Configuration
 kleinanzeigen:
   base_url: "https://www.kleinanzeigen.de"
-  shipping_type: "PICKUP"  # Nur Abholung
-  draft_mode: true  # Save as draft, don't publish
+  shipping_type: "PICKUP" # Nur Abholung
+  draft_mode: true # Save as draft, don't publish
 
 # Content Generation
 content:
@@ -46,4 +46,4 @@ logging:
 vision:
   supported_formats: [".jpg", ".jpeg", ".png", ".webp"]
   max_images_per_ad: 10
-  resize_threshold: 5242880  # 5MB
+  resize_threshold: 5242880 # 5MB
