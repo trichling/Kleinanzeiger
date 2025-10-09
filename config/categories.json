@@ -1,0 +1,55 @@
+{
+  "categories": {
+    "Elektronik": {
+      "subcategories": {
+        "Audio & HiFi": ["Lautsprecher", "Verstärker", "Kopfhörer", "Plattenspieler"],
+        "Foto": ["Kameras", "Objektive", "Zubehör"],
+        "Computer & Zubehör": ["Laptops", "PCs", "Monitore", "Tastaturen", "Mäuse"],
+        "Handy & Telefon": ["Smartphones", "Tablets", "Smartwatches"],
+        "TV & Video": ["Fernseher", "Beamer", "Spielkonsolen"]
+      }
+    },
+    "Möbel & Wohnen": {
+      "subcategories": {
+        "Wohnzimmer": ["Sofas", "Sessel", "Couchtische", "Regale"],
+        "Schlafzimmer": ["Betten", "Matratzen", "Kleiderschränke"],
+        "Küche & Esszimmer": ["Esstische", "Stühle", "Küchenschränke"],
+        "Dekoration": ["Lampen", "Bilder", "Vasen", "Spiegel"]
+      }
+    },
+    "Kleidung & Accessoires": {
+      "subcategories": {
+        "Herrenbekleidung": ["Jacken", "Hosen", "Hemden", "Schuhe"],
+        "Damenbekleidung": ["Kleider", "Jacken", "Hosen", "Schuhe"],
+        "Accessoires & Schmuck": ["Uhren", "Taschen", "Schmuck"]
+      }
+    },
+    "Sport & Fitness": {
+      "subcategories": {
+        "Fahrräder & Zubehör": ["Mountainbikes", "Rennräder", "E-Bikes"],
+        "Fitness & Gym": ["Hanteln", "Trainingsgeräte"],
+        "Wintersport": ["Ski", "Snowboards"],
+        "Wassersport": ["Surfboards", "SUPs"]
+      }
+    },
+    "Haushalt & Garten": {
+      "subcategories": {
+        "Haushaltsgeräte": ["Waschmaschinen", "Trockner", "Staubsauger"],
+        "Gartenmöbel & -geräte": ["Gartentische", "Rasenmäher", "Grills"],
+        "Werkzeuge": ["Bohrmaschinen", "Sägen", "Werkzeugkoffer"]
+      }
+    },
+    "Sonstiges": {
+      "subcategories": {
+        "Verschiedenes": ["Sonstiges"]
+      }
+    }
+  },
+  "keywords": {
+    "Elektronik": ["elektronik", "gerät", "technik", "digital", "kabel"],
+    "Möbel & Wohnen": ["möbel", "tisch", "stuhl", "schrank", "bett", "sofa", "lampe"],
+    "Kleidung & Accessoires": ["kleidung", "shirt", "hose", "jacke", "schuhe", "tasche"],
+    "Sport & Fitness": ["sport", "fahrrad", "bike", "fitness", "hantel", "ski"],
+    "Haushalt & Garten": ["haushalt", "garten", "werkzeug", "waschmaschine", "rasenmäher"]
+  }
+}

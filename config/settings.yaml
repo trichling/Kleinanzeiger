@@ -1,0 +1,49 @@
+# API Configuration
+anthropic:
+  api_key: ${ANTHROPIC_API_KEY}  # Set via environment variable
+  model: "claude-3-5-sonnet-20241022"
+  max_tokens: 2000
+  temperature: 0.7
+
+# Browser Configuration
+browser:
+  cdp_url: "http://localhost:9222"
+  headless: false
+  timeout: 30000
+  screenshot_on_error: true
+
+# Kleinanzeigen Configuration
+kleinanzeigen:
+  base_url: "https://www.kleinanzeigen.de"
+  shipping_type: "PICKUP"  # Nur Abholung
+  draft_mode: true  # Save as draft, don't publish
+
+# Content Generation
+content:
+  max_title_length: 65
+  default_condition: "Gebraucht"
+  price_suggestions:
+    - "Verhandlungsbasis"
+    - "Festpreis"
+
+# Delays (in milliseconds) for human-like interaction
+delays:
+  min_typing: 50
+  max_typing: 150
+  min_click: 100
+  max_click: 300
+  page_load: 2000
+  form_field: 500
+
+# Logging
+logging:
+  level: "INFO"
+  log_dir: "logs"
+  screenshot_dir: "logs/screenshots"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Image Analysis
+vision:
+  supported_formats: [".jpg", ".jpeg", ".png", ".webp"]
+  max_images_per_ad: 10
+  resize_threshold: 5242880  # 5MB
