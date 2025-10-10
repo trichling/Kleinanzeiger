@@ -4,31 +4,30 @@
 Write-Host "🚀 Setting up Kleinanzeiger..." -ForegroundColor Cyan
 
 # Check Python version
-Write-Host "Checking Python version..." -ForegroundColor Yellow
-try {
-    $pythonVersion = & python --version 2>&1 | Select-String -Pattern "(\d+\.\d+\.\d+)" | ForEach-Object { $_.Matches.Groups[1].Value }
-    $requiredVersion = [version]"3.11.0"
-    $currentVersion = [version]$pythonVersion
+# Write-Host "Checking Python version..." -ForegroundColor Yellow
+# try {
+#     $pythonVersion = & python --version 2>&1 | Select-String -Pattern "(\d+\.\d+\.\d+)" | ForEach-Object { $_.Matches.Groups[1].Value }
+#     $requiredVersion = [version]"3.11.0"
+#     $currentVersion = [version]$pythonVersion
     
-    if ($currentVersion -lt $requiredVersion) {
-        Write-Host "❌ Error: Python 3.11 or higher required. Found: $pythonVersion" -ForegroundColor Red
-        exit 1
-    }
-    Write-Host "✅ Python version OK: $pythonVersion" -ForegroundColor Green
-}
-catch {
-    Write-Host "❌ Error: Python not found. Please install Python 3.11 or higher." -ForegroundColor Red
-    exit 1
-}
+#     if ($currentVersion -lt $requiredVersion) {
+#         Write-Host "❌ Error: Python 3.11 or higher required. Found: $pythonVersion" -ForegroundColor Red
+#         exit 1
+#     }
+#     Write-Host "✅ Python version OK: $pythonVersion" -ForegroundColor Green
+# }
+# catch {
+#     Write-Host "❌ Error: Python not found. Please install Python 3.11 or higher." -ForegroundColor Red
+#     exit 1
+# }
 
 # Create virtual environment
 Write-Host "Creating virtual environment..." -ForegroundColor Yellow
-python -m venv venv
+pyenv virtualenv 3.14.0 kleinanzeiger
 Write-Host "✅ Virtual environment created" -ForegroundColor Green
 
 # Activate virtual environment
-Write-Host "Activating virtual environment..." -ForegroundColor Yellow
-& .\venv\Scripts\Activate.ps1
+pyenv local kleinanzeiger
 
 # Upgrade pip
 Write-Host "Upgrading pip..." -ForegroundColor Yellow

@@ -117,18 +117,15 @@ async def main_async(args: argparse.Namespace):
         # Initialize components
         logger.info("Initializing components...")
         
-        vision_config = VisionConfig(**config.get('vision', {}))
         browser_config = BrowserConfig(**config['browser'])
         delays_config = DelaysConfig(**config['delays'])
         
-        # Product analyzer
-        analyzer = ProductAnalyzer(
-            api_key=config['anthropic']['api_key'],
-            model=config['anthropic']['model'],
-            vision_config=vision_config
-        )
+        # Product analyzer - now uses configurable vision backend
+        analyzer = ProductAnalyzer(vision_settings=config.get('vision', {}))
+        logger.info(f"Using vision backend: {analyzer.backend_name}")
         
-        # Content generator
+        # Content generator (still uses Claude/Anthropic)
+        # TODO: Make this configurable like vision backend
         generator = ContentGenerator(
             api_key=config['anthropic']['api_key'],
             model=config['anthropic']['model']

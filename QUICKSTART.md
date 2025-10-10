@@ -19,7 +19,7 @@ cd Kleinanzeiger
 
 **macOS:**
 ```bash
-/Applications/Brave\ Browser.app/Contents/MacOS/Brave\ Browser --remote-debugging-port=9222
+& "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" --remote-debugging-port=9222
 ```
 
 **Windows (PowerShell):**

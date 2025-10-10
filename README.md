@@ -4,7 +4,11 @@ Ein Python-basierter AI-Agent, der automatisch Kleinanzeigen aus Produktbildern 
 
 ## ✨ Features
 
-- 🖼️ **Automatische Bildanalyse** mit Claude Vision API
+- 🖼️ **Flexible Bildanalyse** mit mehreren AI-Backends:
+  - **BLIP-2** (lokal, kostenlos) - Keine API-Keys nötig!
+  - **Claude Vision** (Anthropic) - Beste Qualität
+  - **GPT-4 Vision** (OpenAI) - Sehr gut
+  - **Gemini Vision** (Google) - Kosteneffizient
 - 📝 **Intelligente Content-Generierung** für Titel und Beschreibungen
 - 🌐 **Browser-Automation** via Chrome DevTools Protocol (CDP)
 - 🎯 **Kategorie-Erkennung** für kleinanzeigen.de
@@ -40,7 +44,13 @@ kleinanzeiger/
 
 - Python 3.11 oder höher
 - Brave Browser (oder Chromium-basierter Browser)
-- Anthropic API Key (Claude)
+- **Vision Backend (wähle einen):**
+  - **BLIP-2** (lokal, kostenlos) - Empfohlen für Tests ⭐
+  - **Claude** (Anthropic API Key) - Beste Qualität
+  - **OpenAI** (OpenAI API Key) - Sehr gut
+  - **Gemini** (Google API Key) - Kosteneffizient
+
+📖 **Siehe [VISION_BACKENDS.md](VISION_BACKENDS.md) für Details zu allen Backends**
 
 ## 🚀 Installation
 
@@ -66,12 +76,40 @@ kleinanzeiger/
    playwright install chromium
    ```
 
-5. **Umgebungsvariablen setzen**
+5. **Vision Backend konfigurieren**
    
-   Erstelle eine `.env` Datei im Projektroot:
-   ```env
-   ANTHROPIC_API_KEY=your-api-key-here
+   **Option A: BLIP-2 (Kostenlos, lokal)** - Empfohlen zum Starten
+   ```yaml
+   # In config/settings.yaml
+   vision:
+     backend: "blip2"
    ```
+   Keine API-Keys nötig! Lädt beim ersten Start automatisch das Modell (~15GB).
+
+   **Option B: Claude (Beste Qualität)**
+   ```bash
+   # In .env
+   ANTHROPIC_API_KEY=sk-ant-your-key-here
+   ```
+   ```yaml
+   # In config/settings.yaml
+   vision:
+     backend: "claude"
+   ```
+
+   **Option C: OpenAI oder Gemini**
+   ```bash
+   # In .env (wähle einen)
+   OPENAI_API_KEY=sk-your-key-here
+   GEMINI_API_KEY=your-key-here
+   ```
+   ```yaml
+   # In config/settings.yaml
+   vision:
+     backend: "openai"  # oder "gemini"
+   ```
+
+   📖 **Details zu allen Backends:** [VISION_BACKENDS.md](VISION_BACKENDS.md)
 
 ## 🎯 Verwendung
 
