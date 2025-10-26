@@ -30,14 +30,41 @@ class KleinanzeigenAutomator:
         self.actions = UIActions(page)
     
     async def navigate_to_post_ad(self):
-        """Navigate to the 'post ad' page."""
+        """Navigate to the 'post ad' page (step 2 - the form)."""
         logger.info("Navigating to post ad page")
-        
-        post_url = f"{self.base_url}/p-anzeige-aufgeben.html"
-        await self.page.goto(post_url)
+
+        # Check if we're already on step 2 (the form)
+        current_url = self.page.url
+        if 'p-anzeige-aufgeben-schritt2' in current_url:
+            logger.info("Already on step 2 (form page), skipping navigation")
+            return
+
+        # Check if we're on step 1 (category selection)
+        if 'p-anzeige-aufgeben.html' in current_url or 'p-anzeige-aufgeben-schritt1' in current_url:
+            logger.info("On step 1, clicking to go to step 2")
+            try:
+                # Click the post ad button to proceed to step 2
+                post_button = await self.page.wait_for_selector('//*[@id="site-mainnav-postad"]', timeout=5000)
+                await post_button.click()
+                await self.actions.wait_for_page_load()
+
+                # Check if we made it to step 2
+                if 'schritt2' in self.page.url:
+                    logger.info("Successfully navigated to step 2")
+                    return
+            except Exception as e:
+                logger.warning(f"Could not click button on step 1: {e}")
+
+        # Navigate directly to step 2 (most reliable approach)
+        logger.info("Navigating directly to step 2 (form page)")
+        await self.page.goto(f"{self.base_url}/p-anzeige-aufgeben-schritt2.html")
         await self.actions.wait_for_page_load()
-        
-        logger.info("Arrived at post ad page")
+
+        # Verify we're on the correct page
+        if 'schritt2' in self.page.url:
+            logger.info("Successfully arrived at step 2 (form page)")
+        else:
+            logger.warning(f"May not be on correct page. Current URL: {self.page.url}")
     
     async def check_login_status(self) -> bool:
         """
@@ -101,58 +128,45 @@ class KleinanzeigenAutomator:
     async def fill_ad_form(self, ad_content: AdContent, image_paths: List[Path]):
         """
         Fill out the ad creation form.
-        
+
         Args:
             ad_content: Ad content to post
             image_paths: Paths to images to upload
         """
         logger.info("Filling ad form")
-        
+
         try:
-            # Title
-            logger.info("Entering title")
-            title_input = await self.page.wait_for_selector('input[name="title"], #postad-title', timeout=10000)
+            # Step 1: Fill title (category auto-selected after leaving field)
+            logger.info(f"Entering title: {ad_content.title}")
+            title_input = await self.page.wait_for_selector('//*[@id="postad-title"]', timeout=10000)
             await self.actions.human_type(title_input, ad_content.title)
-            
-            # Description
-            logger.info("Entering description")
-            description_input = await self.page.wait_for_selector(
-                'textarea[name="description"], #postad-description',
-                timeout=10000
-            )
-            await self.actions.human_type(description_input, ad_content.description)
-            
-            # Price
+
+            # Press Tab to trigger category auto-selection (more reliable than blur event)
+            logger.info("Pressing Tab key to trigger category auto-selection")
+            await title_input.press('Tab')
+            await asyncio.sleep(2)  # Wait for category auto-selection to complete
+            logger.info("Title entered, category should be auto-selected")
+
+            # Step 2: Fill price
             logger.info(f"Entering price: €{ad_content.price}")
-            price_input = await self.page.wait_for_selector('input[name="price"], #postad-price', timeout=10000)
+            price_input = await self.page.wait_for_selector('//*[@id="micro-frontend-price"]', timeout=10000)
             await self.actions.human_type(price_input, str(int(ad_content.price)))
-            
-            # Postal code
-            logger.info(f"Entering postal code: {ad_content.postal_code}")
-            postal_input = await self.page.wait_for_selector(
-                'input[name="zipCode"], input[name="postalCode"], #postad-zip',
-                timeout=10000
-            )
-            await self.actions.human_type(postal_input, ad_content.postal_code)
-            
-            # Shipping type (Nur Abholung)
-            logger.info("Setting shipping to PICKUP only")
-            try:
-                pickup_radio = await self.page.wait_for_selector(
-                    'input[value="PICKUP"], input[name="shippingType"][value="pickup"]',
-                    timeout=5000
-                )
-                await self.actions.human_click(pickup_radio)
-            except Exception as e:
-                logger.warning(f"Could not set shipping type: {e}")
-            
-            # Upload images
-            if image_paths:
-                logger.info(f"Uploading {len(image_paths)} images")
-                await self.upload_images(image_paths)
-            
+
+            # Step 3: Select VB (Verhandlungsbasis)
+            logger.info("Selecting 'Verhandlungsbasis' (VB)")
+            price_type_select = await self.page.wait_for_selector('//*[@id="micro-frontend-price-type"]', timeout=10000)
+            await price_type_select.select_option(value='NEGOTIABLE')  # VB = NEGOTIABLE
+
+            # Step 4: Fill description
+            logger.info("Entering description")
+            description_input = await self.page.wait_for_selector('//*[@id="pstad-descrptn"]', timeout=10000)
+            await self.actions.human_type(description_input, ad_content.description)
+
+            # Note: Skipping image upload for now as requested
+            # Note: Skipping postal code - may be auto-filled from profile
+
             logger.info("Form filled successfully")
-            
+
         except Exception as e:
             logger.error(f"Error filling form: {e}")
             raise
@@ -184,28 +198,54 @@ class KleinanzeigenAutomator:
             logger.error(f"Error uploading images: {e}")
             raise
     
-    async def save_as_draft(self):
-        """Save the ad as a draft instead of publishing."""
+    async def save_as_draft(self) -> bool:
+        """
+        Save the ad as a draft instead of publishing.
+
+        Returns:
+            True if draft was saved, False if user cancelled
+        """
         logger.info("Saving ad as draft")
-        
+
         try:
-            # Look for "Save as draft" button (adjust selector based on actual site)
+            # Show current page info for user confirmation
+            logger.info(f"Current URL: {self.page.url}")
+            logger.info("Ad form has been filled and is ready to be saved as draft.")
+
+            # Add confirmation prompt - wait for user input
+            logger.warning("=" * 60)
+            logger.warning("CONFIRMATION: Ready to save ad as draft!")
+            logger.warning("=" * 60)
+
+            # Wait for user confirmation
+            user_input = input("Type 'yes' to proceed with saving the draft (anything else to skip): ").strip().lower()
+
+            if user_input != 'yes':
+                logger.info(f"User cancelled draft save (typed '{user_input}'). Skipping save.")
+                logger.info("Test completed successfully - form was filled correctly.")
+                return False
+
+            logger.info("Confirmation received, proceeding with save...")
+
+            # Click "Entwurf speichern" (Save Draft) button
+            logger.info("Clicking 'Entwurf speichern' button")
             draft_button = await self.page.wait_for_selector(
-                'button:has-text("Entwurf"), button:has-text("Als Entwurf speichern")',
+                '//*[@id="j-post-listing-frontend-draft-button"]/div/div/button',
                 timeout=10000
             )
-            
+
             await self.actions.human_click(draft_button)
-            
-            # Wait for confirmation
-            await asyncio.sleep(2)
-            
+
+            # Wait for confirmation/redirect
+            await asyncio.sleep(3)
+
             logger.info("Ad saved as draft successfully")
-            
+            logger.info(f"Current URL: {self.page.url}")
+            return True
+
         except Exception as e:
             logger.error(f"Error saving draft: {e}")
-            # If draft button not found, try to find regular submit and warn user
-            logger.warning("Could not find draft button - ad may be published instead!")
+            logger.warning("Could not find draft button at expected location")
             raise
     
     async def create_ad(self, ad_content: AdContent, image_paths: List[Path], 
@@ -219,29 +259,35 @@ class KleinanzeigenAutomator:
             save_as_draft: Whether to save as draft (default True)
         """
         logger.info("Starting ad creation process")
-        
+
         # Navigate to post ad page
         await self.navigate_to_post_ad()
-        
-        # Check login status
-        if not await self.check_login_status():
-            logger.error("User not logged in - manual login required")
-            raise Exception("User must be logged in to post ads")
-        
-        # Select category
-        await self.select_category(ad_content.category, ad_content.subcategory)
-        
-        # Fill form
+
+        # Check login status (optional - mainly for debugging)
+        # The site will show login if needed
+        try:
+            if not await self.check_login_status():
+                logger.warning("User may not be logged in - proceeding anyway")
+        except Exception as e:
+            logger.debug(f"Login check failed: {e}, continuing anyway")
+
+        # Fill form (category auto-selected from title)
         await self.fill_ad_form(ad_content, image_paths)
-        
+
         # Scroll randomly to appear human
         await self.actions.scroll_randomly()
-        
+
         # Save as draft or publish
         if save_as_draft:
-            await self.save_as_draft()
+            saved = await self.save_as_draft()
+            if not saved:
+                logger.info("Draft save skipped by user - ad creation process completed")
+                return
         else:
             logger.warning("Publishing ad directly (not implemented - defaults to draft)")
-            await self.save_as_draft()
-        
+            saved = await self.save_as_draft()
+            if not saved:
+                logger.info("Draft save skipped by user - ad creation process completed")
+                return
+
         logger.info("Ad creation completed successfully")

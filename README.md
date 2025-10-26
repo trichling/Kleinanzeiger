@@ -9,7 +9,12 @@ Ein Python-basierter AI-Agent, der automatisch Kleinanzeigen aus Produktbildern 
   - **Claude Vision** (Anthropic) - Beste Qualität
   - **GPT-4 Vision** (OpenAI) - Sehr gut
   - **Gemini Vision** (Google) - Kosteneffizient
-- 📝 **Intelligente Content-Generierung** für Titel und Beschreibungen
+- 📝 **Intelligente Content-Generierung** mit mehreren Backends:
+  - **Simple** (Template-basiert, kostenlos) - Keine API-Keys nötig!
+  - **Claude** (Anthropic) - Beste Text-Qualität
+  - **Gemini** (Google) - Kosteneffizient
+  - **GPT-4** (OpenAI) - Sehr gut
+- 🔄 **Unabhängige Backend-Auswahl** für Vision und Content
 - 🌐 **Browser-Automation** via Chrome DevTools Protocol (CDP)
 - 🎯 **Kategorie-Erkennung** für kleinanzeigen.de
 - 🤖 **Menschenähnliche Interaktionen** mit realistischen Verzögerungen
@@ -62,8 +67,9 @@ kleinanzeiger/
 
 2. **Virtuelle Umgebung erstellen**
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # Unter Windows: venv\Scripts\activate
+   pyenv virtualenv 3.12.0 kleinanzeiger
+   pyenv install 3.12.0
+   pyenv local kleinanzeiger
    ```
 
 3. **Dependencies installieren**
@@ -117,15 +123,22 @@ kleinanzeiger/
 
 Starte Brave mit aktiviertem Remote Debugging:
 
+**Bash (macOS/Linux):**
 ```bash
 # macOS
-/Applications/Brave\ Browser.app/Contents/MacOS/Brave\ Browser --remote-debugging-port=9222
-
-# Windows
-"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --remote-debugging-port=9222
+"/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" --remote-debugging-port=9222
 
 # Linux
 brave-browser --remote-debugging-port=9222
+```
+
+**PowerShell (macOS/Windows):**
+```powershell
+# macOS
+& "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" --remote-debugging-port=9222
+
+# Windows
+& "C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --remote-debugging-port=9222
 ```
 
 ### 2. Bei kleinanzeigen.de einloggen
@@ -163,12 +176,37 @@ python -m src.main \
 
 Die Konfiguration erfolgt über `config/settings.yaml`:
 
-```yaml
-# API-Konfiguration
-anthropic:
-  api_key: ${ANTHROPIC_API_KEY}
-  model: "claude-3-5-sonnet-20241022"
+### Backend-Auswahl
 
+Das Projekt verwendet **zwei separate Backends**:
+
+1. **Vision Backend** (Bildanalyse): Analysiert die Produktbilder
+2. **Content Backend** (Text-Generierung): Erstellt Titel und Beschreibungen
+
+Beide können unabhängig voneinander konfiguriert werden:
+
+```yaml
+# Bildanalyse-Backend
+vision:
+  backend: "gemini"  # 'claude', 'gemini', 'openai', 'blip2'
+
+# Text-Generierungs-Backend
+content:
+  backend: "gemini"  # 'claude', 'gemini', 'openai', 'simple'
+```
+
+**Empfohlene Konfigurationen:**
+
+| Szenario | Vision Backend | Content Backend | API Keys benötigt |
+|----------|----------------|-----------------|-------------------|
+| **Kostenlos (lokal)** | `blip2` | `simple` | Keine |
+| **Beste Qualität** | `claude` | `claude` | ANTHROPIC_API_KEY |
+| **Günstig** | `gemini` | `gemini` | GEMINI_API_KEY |
+| **Gemischt** | `blip2` | `gemini` | GEMINI_API_KEY |
+
+### Weitere Einstellungen
+
+```yaml
 # Browser-Konfiguration
 browser:
   cdp_url: "http://localhost:9222"
@@ -194,9 +232,16 @@ products/
 ├── bike/
 │   ├── full.jpg
 │   └── details.jpg
+├── phone/
+│   ├── IMG_1234.heic  # HEIC files werden automatisch konvertiert
+│   └── IMG_1235.heic
 ```
 
-Unterstützte Formate: `.jpg`, `.jpeg`, `.png`, `.webp`
+**Unterstützte Formate:**
+- Direkt: `.jpg`, `.jpeg`, `.png`, `.webp`
+- **Automatische Konvertierung**: `.heic`, `.heif` (z.B. iPhone-Fotos) → werden zu `.jpg` konvertiert
+
+**Hinweis:** HEIC-Dateien (typisch von iPhones) werden beim Laden automatisch zu JPEG konvertiert und im gleichen Ordner gespeichert.
 
 ## 🧪 Tests ausführen
 
@@ -213,10 +258,10 @@ pytest tests/test_categories.py
 
 ## 📝 Workflow
 
-1. **Bildanalyse**: Claude Vision analysiert alle Bilder im Ordner
+1. **Bildanalyse**: Gewähltes Vision-Backend analysiert alle Bilder im Ordner
 2. **Produktinfo-Extraktion**: Name, Beschreibung, Zustand, Marke, Preis
 3. **Kategorie-Mapping**: Automatische Zuordnung zu kleinanzeigen.de-Kategorien
-4. **Content-Generierung**: Optimierter Titel (max. 65 Zeichen) und Beschreibung
+4. **Content-Generierung**: Gewähltes Content-Backend erstellt optimierten Titel und Beschreibung
 5. **Browser-Automation**: Verbindung zum laufenden Brave Browser via CDP
 6. **Formular-Ausfüllung**: Menschenähnliche Eingaben mit Verzögerungen
 7. **Entwurf speichern**: Anzeige als Entwurf speichern (nicht veröffentlichen)
@@ -261,10 +306,14 @@ logging:
 ## 📚 Dependencies
 
 - **playwright**: Browser-Automation
-- **anthropic**: Claude API Client
 - **Pillow**: Bildverarbeitung
+- **pillow-heif**: HEIC/HEIF Bildformat-Unterstützung (iPhone-Fotos)
 - **pydantic**: Datenvalidierung
 - **PyYAML**: Konfiguration
+- **anthropic**: Claude API Client (optional, je nach Backend)
+- **google-generativeai**: Gemini API Client (optional, je nach Backend)
+- **openai**: OpenAI API Client (optional, je nach Backend)
+- **torch/transformers**: BLIP-2 lokales Modell (optional, je nach Backend)
 
 ## 🤝 Beitragen
 

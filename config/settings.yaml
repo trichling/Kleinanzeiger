@@ -7,7 +7,7 @@ anthropic:
 
 # Browser Configuration
 browser:
-  cdp_url: "http://localhost:9222"
+  cdp_url: "http://127.0.0.1:9222"  # Use explicit IPv4 to avoid IPv6 issues
   headless: false
   timeout: 30000
   screenshot_on_error: true
@@ -18,13 +18,32 @@ kleinanzeigen:
   shipping_type: "PICKUP" # Nur Abholung
   draft_mode: true # Save as draft, don't publish
 
-# Content Generation
+# Content Generation - Multi-Backend Support
 content:
+  # Backend selection: 'claude', 'gemini', 'openai', 'simple'
+  # 'simple' = template-based generation (no AI, no API key needed)
+  backend: "gemini" # Using same backend as vision
+
   max_title_length: 65
   default_condition: "Gebraucht"
   price_suggestions:
     - "Verhandlungsbasis"
     - "Festpreis"
+
+  # Claude (Anthropic) for content generation
+  claude:
+    api_key: ${ANTHROPIC_API_KEY}
+    model: "claude-3-5-sonnet-20241022"
+
+  # Gemini (Google) for content generation
+  gemini:
+    api_key: ${GEMINI_API_KEY}
+    model: "gemini-2.5-flash"  # Latest stable model
+
+  # OpenAI for content generation
+  openai:
+    api_key: ${OPENAI_API_KEY}
+    model: "gpt-4-turbo-preview"
 
 # Delays (in milliseconds) for human-like interaction
 delays:
@@ -45,33 +64,34 @@ logging:
 # Image Analysis - Multi-Backend Support
 vision:
   # Backend selection: 'claude', 'blip2', 'openai', 'gemini'
-  backend: "blip2"  # Default to free local model
-  
+  backend: "gemini" # Default to free local model
+
   # Common settings for all backends
   supported_formats: [".jpg", ".jpeg", ".png", ".webp"]
+  # Note: HEIC/HEIF files are automatically converted to JPEG
   max_images_per_ad: 10
   resize_threshold: 5242880 # 5MB
-  
+
   # Claude-specific settings
   claude:
     api_key: ${ANTHROPIC_API_KEY}
     model: "claude-3-5-sonnet-20241022"
     max_tokens: 2000
     temperature: 0.7
-  
+
   # BLIP-2 local model settings (FREE - no API key needed)
   blip2:
-    model_name: "Salesforce/blip2-opt-2.7b"  # or "Salesforce/blip2-flan-t5-xl"
-    device: "auto"  # 'auto', 'cuda', or 'cpu'
+    model_name: "Salesforce/blip2-opt-2.7b" # or "Salesforce/blip2-flan-t5-xl"
+    device: "auto" # 'auto', 'cuda', or 'cpu'
     max_new_tokens: 500
-  
+
   # OpenAI GPT-4 Vision settings
   openai:
     api_key: ${OPENAI_API_KEY}
     model: "gpt-4-vision-preview"
     max_tokens: 2000
-  
+
   # Google Gemini Vision settings
   gemini:
     api_key: ${GEMINI_API_KEY}
-    model: "gemini-pro-vision"
+    model: "gemini-2.5-flash"  # Latest stable model with vision support

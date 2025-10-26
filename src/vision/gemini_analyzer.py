@@ -21,15 +21,25 @@ class GeminiVisionAnalyzer(VisionAnalyzer):
     def __init__(self, config: Dict[str, Any]):
         """
         Initialize Gemini Vision analyzer.
-        
+
         Args:
             config: Configuration with 'api_key', 'model', etc.
         """
         super().__init__(config)
-        genai.configure(api_key=config['api_key'])
+        api_key = config.get('api_key')
+
+        # Debug logging
+        if api_key:
+            logger.debug(f"Gemini API key present: {api_key[:20]}... (length: {len(api_key)})")
+        else:
+            logger.error("No API key provided in config!")
+            raise ValueError("Gemini API key is required but not provided in config")
+
+        genai.configure(api_key=api_key)
         self.model_name = config.get('model', 'gemini-pro-vision')
         self.model = genai.GenerativeModel(self.model_name)
         self.max_images = config.get('max_images_per_ad', 10)
+        logger.debug(f"Gemini analyzer initialized with model: {self.model_name}")
     
     def get_supported_formats(self) -> list[str]:
         """Gemini supports JPG, PNG, WEBP."""
