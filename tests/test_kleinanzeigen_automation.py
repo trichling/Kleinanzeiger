@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Now import from src package
 from src.automation.browser import BrowserController
-from src.automation.kleinanzeigen import KleinanzeigenAutomator
+from src.automation.kleinanzeigen import KleinanzeigenAutomator, collect_uploadable_images
 from src.vision.models import BrowserConfig, AdContent
 
 
@@ -246,15 +246,19 @@ async def test_create_ad_flow():
         print(f"  Price: €{test_ad.price}")
         print(f"  Postal code: {test_ad.postal_code}")
 
-        # Create dummy image paths (we'll use the converted JPEGs if they exist)
-        image_folder = Path("products/Playmobil 4140 City Life")
-        if image_folder.exists():
-            image_paths = list(image_folder.glob("*.jpg"))[:3]  # Use up to 3 images
-        else:
-            # Create empty list if no images available
-            image_paths = []
+        # Use test images from tests/products folder
+        image_folder = Path("tests/products")
+        image_paths = []
 
-        print(f"  Images: {len(image_paths)} image(s)")
+        try:
+            # Use the helper function to collect uploadable images (excludes HEIC)
+            image_paths = collect_uploadable_images(image_folder, max_images=5)
+            print(f"  Images: {len(image_paths)} image(s) from {image_folder}")
+            for img in image_paths:
+                print(f"    - {img.name}")
+        except ValueError as e:
+            print(f"  ⚠ {e}")
+            print("  Test will proceed without images")
 
         # Try to create the ad
         print("\nStarting ad creation...")

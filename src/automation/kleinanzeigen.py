@@ -14,6 +14,46 @@ from .actions import UIActions
 logger = logging.getLogger(__name__)
 
 
+def collect_uploadable_images(image_folder: Path, max_images: int = 10) -> List[Path]:
+    """
+    Collect all uploadable images from a folder (excludes HEIC files).
+
+    Args:
+        image_folder: Path to folder containing images
+        max_images: Maximum number of images to collect
+
+    Returns:
+        List of image paths (excluding HEIC/HEIF files)
+
+    Raises:
+        ValueError: If folder doesn't exist or no uploadable images found
+    """
+    if not image_folder.exists():
+        raise ValueError(f"Image folder not found: {image_folder}")
+
+    # Supported web image formats (excludes HEIC/HEIF which are not web-compatible)
+    supported_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'}
+
+    image_paths = []
+
+    for p in sorted(image_folder.iterdir()):
+        if not p.is_file():
+            continue
+
+        # Only include web-compatible image formats
+        if p.suffix.lower() in supported_extensions:
+            image_paths.append(p)
+
+        # Stop if we've reached max_images
+        if len(image_paths) >= max_images:
+            break
+
+    if not image_paths:
+        raise ValueError(f"No uploadable images found in {image_folder}")
+
+    return image_paths
+
+
 class KleinanzeigenAutomator:
     """Automates ad posting on kleinanzeigen.de."""
     
@@ -162,7 +202,11 @@ class KleinanzeigenAutomator:
             description_input = await self.page.wait_for_selector('//*[@id="pstad-descrptn"]', timeout=10000)
             await self.actions.human_type(description_input, ad_content.description)
 
-            # Note: Skipping image upload for now as requested
+            # Step 5: Upload images if provided
+            if image_paths:
+                logger.info(f"Uploading {len(image_paths)} image(s)")
+                await self.upload_images(image_paths)
+
             # Note: Skipping postal code - may be auto-filled from profile
 
             logger.info("Form filled successfully")
@@ -173,27 +217,47 @@ class KleinanzeigenAutomator:
     
     async def upload_images(self, image_paths: List[Path]):
         """
-        Upload product images.
-        
+        Upload product images by clicking the upload icon and selecting files.
+        Skips HEIC files automatically.
+
         Args:
-            image_paths: List of image paths to upload
+            image_paths: List of image paths to upload (should not include .heic files)
         """
         try:
-            # Find file input
+            # Filter out HEIC files (shouldn't be in the list, but double-check)
+            uploadable_images = [
+                p for p in image_paths
+                if p.suffix.lower() not in ['.heic', '.heif']
+            ]
+
+            if not uploadable_images:
+                logger.warning("No uploadable images found (HEIC files are not supported)")
+                return
+
+            logger.info(f"Preparing to upload {len(uploadable_images)} image(s)")
+
+            # Find the hidden file input element (the actual input that handles file selection)
+            # Kleinanzeigen uses a hidden file input that gets triggered by clicking the icon
             file_input = await self.page.wait_for_selector(
                 'input[type="file"][accept*="image"]',
-                timeout=10000
+                timeout=10000,
+                state='attached'  # Element might be hidden, so just check if attached
             )
-            
-            # Upload all images at once
-            image_path_strs = [str(p.resolve()) for p in image_paths]
+
+            # Upload all images at once using the file input
+            # Convert Path objects to absolute string paths
+            image_path_strs = [str(p.resolve()) for p in uploadable_images]
+            logger.info(f"Uploading images: {[p.name for p in uploadable_images]}")
+
             await file_input.set_input_files(image_path_strs)
-            
-            # Wait for upload to complete
-            await asyncio.sleep(2)
-            
-            logger.info(f"Uploaded {len(image_paths)} images")
-            
+
+            # Wait for uploads to complete (give more time for multiple images)
+            wait_time = min(2 + len(uploadable_images) * 0.5, 10)  # 2s base + 0.5s per image, max 10s
+            logger.info(f"Waiting {wait_time:.1f}s for upload to complete")
+            await asyncio.sleep(wait_time)
+
+            logger.info(f"Successfully uploaded {len(uploadable_images)} image(s)")
+
         except Exception as e:
             logger.error(f"Error uploading images: {e}")
             raise
