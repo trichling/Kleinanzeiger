@@ -134,37 +134,139 @@ class KleinanzeigenAutomator:
     async def select_category(self, category: str, subcategory: Optional[str] = None):
         """
         Select category and subcategory.
-        
+
         Args:
             category: Main category
             subcategory: Optional subcategory
         """
         logger.info(f"Selecting category: {category}, subcategory: {subcategory}")
-        
+
         try:
             # This is a simplified example - actual selectors need to be determined
             # by inspecting kleinanzeigen.de's current HTML structure
-            
+
             # Click on category selection
             category_selector = await self.page.wait_for_selector('[data-testid="category-selector"]', timeout=5000)
             await self.actions.human_click(category_selector)
-            
+
             # Select main category
             category_option = await self.page.wait_for_selector(f'text="{category}"', timeout=5000)
             await self.actions.human_click(category_option)
-            
+
             # Select subcategory if provided
             if subcategory:
                 await asyncio.sleep(0.5)
                 subcategory_option = await self.page.wait_for_selector(f'text="{subcategory}"', timeout=5000)
                 await self.actions.human_click(subcategory_option)
-            
+
             logger.info("Category selected successfully")
-            
+
         except Exception as e:
             logger.error(f"Error selecting category: {e}")
             raise
-    
+
+    async def select_condition(self, condition: str):
+        """
+        Select product condition by opening the dialog and choosing the appropriate radio button.
+
+        Args:
+            condition: Product condition (Neu, Wie neu, Gebraucht, Defekt, etc.)
+        """
+        logger.info(f"Selecting condition: {condition}")
+
+        try:
+            # Map German condition values to radio button indices
+            condition_mapping = {
+                'Neu': 1,           # New
+                'Wie neu': 2,       # Like new
+                'Gut': 3,           # OK/Good
+                'Gebraucht': 3,     # Used -> map to OK/Good
+                'Akzeptabel': 4,    # Alright/Acceptable
+                'Defekt': 4         # Defective -> map to Alright (closest option)
+            }
+
+            # Get the radio button index (default to 3 = OK/Good if not found)
+            button_index = condition_mapping.get(condition, 3)
+            logger.info(f"Mapping '{condition}' to radio button index {button_index}")
+
+            # Step 1: Click the button to open the condition dialog
+            logger.info("Opening condition selection dialog")
+            dialog_trigger = await self.page.wait_for_selector(
+                '//*[@id="j-post-listing-frontend-conditions"]/div/div/div/div[1]/div[2]/div/button',
+                timeout=10000
+            )
+            await self.actions.human_click(dialog_trigger)
+
+            # Wait for dialog to appear
+            await asyncio.sleep(0.5)
+
+            # Step 2: Select the appropriate radio button
+            logger.info(f"Selecting condition radio button {button_index}")
+            condition_radio = await self.page.wait_for_selector(
+                f'//*[@id="condition-selector"]/div/label[{button_index}]',
+                timeout=10000
+            )
+            await self.actions.human_click(condition_radio)
+
+            # Small delay to let selection register
+            await asyncio.sleep(0.3)
+
+            # Step 3: Confirm selection by clicking the confirmation button
+            logger.info("Confirming condition selection")
+            confirm_button = await self.page.wait_for_selector(
+                '//*[@id="j-post-listing-frontend-conditions"]/div/div/div/div[1]/div[2]/div/dialog/div/footer/button[2]',
+                timeout=10000
+            )
+            await self.actions.human_click(confirm_button)
+
+            # Wait for dialog to close
+            await asyncio.sleep(0.5)
+
+            logger.info(f"Condition '{condition}' selected successfully")
+
+        except Exception as e:
+            logger.error(f"Error selecting condition: {e}")
+            raise
+
+    async def select_shipping_method(self, shipping_type: str = "PICKUP"):
+        """
+        Select shipping method (pickup or shipping).
+
+        Args:
+            shipping_type: Shipping type (PICKUP, SHIPPING, or BOTH)
+        """
+        logger.info(f"Selecting shipping method: {shipping_type}")
+
+        try:
+            # Map shipping types to radio button indices
+            # Currently only implementing pickup as requested
+            shipping_mapping = {
+                'PICKUP': 2,     # Pickup only (Abholung)
+                'SHIPPING': 1,   # Shipping (Versand) - if needed later
+                'BOTH': 3        # Both options - if needed later
+            }
+
+            # Get the radio button index (default to 2 = PICKUP if not found)
+            button_index = shipping_mapping.get(shipping_type, 2)
+            logger.info(f"Mapping '{shipping_type}' to radio button index {button_index}")
+
+            # Select the shipping method radio button
+            logger.info("Selecting pickup option")
+            shipping_radio = await self.page.wait_for_selector(
+                f'//*[@id="shipping-pickup-selector"]/div/label[{button_index}]',
+                timeout=10000
+            )
+            await self.actions.human_click(shipping_radio)
+
+            # Small delay to let selection register
+            await asyncio.sleep(0.3)
+
+            logger.info(f"Shipping method '{shipping_type}' selected successfully")
+
+        except Exception as e:
+            logger.error(f"Error selecting shipping method: {e}")
+            raise
+
     async def fill_ad_form(self, ad_content: AdContent, image_paths: List[Path]):
         """
         Fill out the ad creation form.
@@ -187,22 +289,30 @@ class KleinanzeigenAutomator:
             await asyncio.sleep(2)  # Wait for category auto-selection to complete
             logger.info("Title entered, category should be auto-selected")
 
-            # Step 2: Fill price
+            # Step 2: Select condition (after category auto-selection)
+            logger.info(f"Selecting condition: {ad_content.condition}")
+            await self.select_condition(ad_content.condition)
+
+            # Step 3: Select shipping method
+            logger.info(f"Selecting shipping method: {ad_content.shipping_type}")
+            await self.select_shipping_method(ad_content.shipping_type)
+
+            # Step 4: Fill price
             logger.info(f"Entering price: €{ad_content.price}")
             price_input = await self.page.wait_for_selector('//*[@id="micro-frontend-price"]', timeout=10000)
             await self.actions.human_type(price_input, str(int(ad_content.price)))
 
-            # Step 3: Select VB (Verhandlungsbasis)
+            # Step 5: Select VB (Verhandlungsbasis)
             logger.info("Selecting 'Verhandlungsbasis' (VB)")
             price_type_select = await self.page.wait_for_selector('//*[@id="micro-frontend-price-type"]', timeout=10000)
             await price_type_select.select_option(value='NEGOTIABLE')  # VB = NEGOTIABLE
 
-            # Step 4: Fill description
+            # Step 6: Fill description
             logger.info("Entering description")
             description_input = await self.page.wait_for_selector('//*[@id="pstad-descrptn"]', timeout=10000)
             await self.actions.human_type(description_input, ad_content.description)
 
-            # Step 5: Upload images if provided
+            # Step 7: Upload images if provided
             if image_paths:
                 logger.info(f"Uploading {len(image_paths)} image(s)")
                 await self.upload_images(image_paths)

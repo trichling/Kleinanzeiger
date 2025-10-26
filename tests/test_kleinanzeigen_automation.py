@@ -243,6 +243,8 @@ async def test_create_ad_flow():
         print(f"\nTest ad created:")
         print(f"  Title: {test_ad.title}")
         print(f"  Category: {test_ad.category}")
+        print(f"  Condition: {test_ad.condition}")
+        print(f"  Shipping: {test_ad.shipping_type}")
         print(f"  Price: €{test_ad.price}")
         print(f"  Postal code: {test_ad.postal_code}")
 
