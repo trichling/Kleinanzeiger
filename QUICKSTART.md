@@ -24,7 +24,24 @@ cd Kleinanzeiger
 
 **Windows (PowerShell):**
 ```powershell
-& "C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --remote-debugging-port=9222
+# Einfachste Methode: Helper-Script verwenden
+.\start-brave-windows.ps1
+
+# Oder manuell:
+# Schließe alle Brave-Instanzen zuerst
+Stop-Process -Name "brave" -Force -ErrorAction SilentlyContinue
+
+# Warte kurz
+Start-Sleep -Seconds 2
+
+# Starte Brave mit Remote Debugging
+Start-Process "C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" -ArgumentList "--remote-debugging-port=9222"
+```
+
+**Alternativ (wenn du Brave offen lassen willst):**
+```powershell
+# Verwende einen anderen Port und starte eine separate Brave-Instanz mit eigenem Profil
+Start-Process "C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" -ArgumentList "--remote-debugging-port=9222", "--user-data-dir=$env:TEMP\brave-automation"
 ```
 
 **Linux:**
@@ -84,7 +101,22 @@ logging:
 
 ## 🔍 Troubleshooting
 
-### "Browser nicht verbunden"
+### "Browser nicht verbunden" (ECONNREFUSED 127.0.0.1:9222)
+
+**Windows-spezifisch:**
+- ✅ Alle Brave-Instanzen geschlossen? → `Stop-Process -Name "brave" -Force`
+- ✅ Port 9222 frei? → `Get-NetTCPConnection -LocalPort 9222 -ErrorAction SilentlyContinue`
+- ✅ Brave mit `Start-Process` starten, nicht mit `&`
+- ✅ Firewall blockiert Port 9222 nicht?
+- ✅ Nach dem Start 5-10 Sekunden warten, bevor du das Script startest
+
+**Teste die Verbindung:**
+```powershell
+# Brave sollte eine JSON-Antwort liefern, wenn alles funktioniert
+curl http://127.0.0.1:9222/json/version
+```
+
+**macOS/Linux:**
 - ✅ Brave mit `--remote-debugging-port=9222` gestartet?
 - ✅ Port 9222 frei? → `lsof -i :9222` (Mac/Linux)
 

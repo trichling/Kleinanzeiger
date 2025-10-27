@@ -372,7 +372,7 @@ class KleinanzeigenAutomator:
             logger.error(f"Error uploading images: {e}")
             raise
     
-    async def save_as_draft(self, auto_confirm: bool = False) -> bool:
+    async def save_as_draft(self, auto_confirm: bool = False) -> tuple[bool, bool]:
         """
         Save the ad as a draft instead of publishing.
 
@@ -380,7 +380,9 @@ class KleinanzeigenAutomator:
             auto_confirm: If True, skip confirmation prompt and save immediately
 
         Returns:
-            True if draft was saved, False if user cancelled
+            Tuple of (saved: bool, keep_browser_open: bool)
+            - saved: True if draft was saved, False if user cancelled
+            - keep_browser_open: True if browser should stay open for manual review
         """
         logger.info("Saving ad as draft")
 
@@ -401,8 +403,9 @@ class KleinanzeigenAutomator:
 
                 if user_input != 'yes':
                     logger.info(f"User cancelled draft save (typed '{user_input}'). Skipping save.")
+                    logger.info("Browser tab will remain open for manual review.")
                     logger.info("Test completed successfully - form was filled correctly.")
-                    return False
+                    return (False, True)  # Not saved, keep browser open
 
                 logger.info("Confirmation received, proceeding with save...")
             else:
@@ -422,7 +425,7 @@ class KleinanzeigenAutomator:
 
             logger.info("Ad saved as draft successfully")
             logger.info(f"Current URL: {self.page.url}")
-            return True
+            return (True, False)  # Saved, can close browser
 
         except Exception as e:
             logger.error(f"Error saving draft: {e}")
@@ -430,7 +433,7 @@ class KleinanzeigenAutomator:
             raise
     
     async def create_ad(self, ad_content: AdContent, image_paths: List[Path],
-                       save_as_draft: bool = True, auto_confirm: bool = False):
+                       save_as_draft: bool = True, auto_confirm: bool = False) -> bool:
         """
         Create a complete ad on kleinanzeigen.de.
 
@@ -439,6 +442,9 @@ class KleinanzeigenAutomator:
             image_paths: Product images
             save_as_draft: Whether to save as draft (default True)
             auto_confirm: Skip confirmation prompt before saving (default False)
+
+        Returns:
+            True if browser should be kept open for manual review, False otherwise
         """
         logger.info("Starting ad creation process")
 
@@ -461,15 +467,16 @@ class KleinanzeigenAutomator:
 
         # Save as draft or publish
         if save_as_draft:
-            saved = await self.save_as_draft(auto_confirm=auto_confirm)
+            saved, keep_open = await self.save_as_draft(auto_confirm=auto_confirm)
             if not saved:
                 logger.info("Draft save skipped by user - ad creation process completed")
-                return
+                return keep_open
         else:
             logger.warning("Publishing ad directly (not implemented - defaults to draft)")
-            saved = await self.save_as_draft(auto_confirm=auto_confirm)
+            saved, keep_open = await self.save_as_draft(auto_confirm=auto_confirm)
             if not saved:
                 logger.info("Draft save skipped by user - ad creation process completed")
-                return
+                return keep_open
 
         logger.info("Ad creation completed successfully")
+        return False  # Draft saved, can close browser

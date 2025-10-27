@@ -55,6 +55,7 @@ kleinanzeiger/
   - **OpenAI** (OpenAI API Key) - Sehr gut
   - **Gemini** (Google API Key) - Kosteneffizient
 
+
 📖 **Siehe [VISION_BACKENDS.md](VISION_BACKENDS.md) für Details zu allen Backends**
 
 ## 🚀 Installation
@@ -137,9 +138,14 @@ brave-browser --remote-debugging-port=9222
 # macOS
 & "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" --remote-debugging-port=9222
 
-# Windows
-& "C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --remote-debugging-port=9222
+# Windows - Verwende das Helper-Script (EMPFOHLEN)
+.\start-brave-windows.ps1
+
+# Oder manuell:
+Start-Process "C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" -ArgumentList "--remote-debugging-port=9222"
 ```
+
+> **⚠️ Windows-Nutzer:** Der alte Befehl mit `&` funktioniert unter Windows nicht! Siehe [Windows-Troubleshooting](WINDOWS_TROUBLESHOOTING.md) für Details.
 
 ### 2. Bei kleinanzeigen.de einloggen
 
@@ -287,9 +293,19 @@ logging:
 
 ## 🛠️ Troubleshooting
 
-### Browser verbindet nicht
+### Browser verbindet nicht (ECONNREFUSED 127.0.0.1:9222)
+
+**Windows-Nutzer:** Siehe detaillierte Anleitung → [Windows-Troubleshooting](WINDOWS_TROUBLESHOOTING.md)
+
+**Schnelle Lösung (Windows):**
+```powershell
+.\start-brave-windows.ps1
+```
+
+**macOS/Linux:**
 - Stelle sicher, dass Brave mit `--remote-debugging-port=9222` gestartet wurde
-- Prüfe, ob Port 9222 frei ist: `lsof -i :9222` (macOS/Linux)
+- Prüfe, ob Port 9222 frei ist: `lsof -i :9222`
+- Teste Verbindung: `curl http://127.0.0.1:9222/json/version`
 
 ### Claude API Fehler
 - Prüfe `ANTHROPIC_API_KEY` in `.env`

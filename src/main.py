@@ -262,6 +262,7 @@ async def main_async(args: argparse.Namespace):
         logger.info("Make sure Brave is running with: brave --remote-debugging-port=9222")
         
         browser_controller = BrowserController(browser_config)
+        keep_browser_open = False
         
         try:
             page = await browser_controller.connect()
@@ -270,7 +271,7 @@ async def main_async(args: argparse.Namespace):
             logger.info("Step 5: Creating ad on kleinanzeigen.de...")
             automator = KleinanzeigenAutomator(page, config['kleinanzeigen']['base_url'])
             
-            await automator.create_ad(
+            keep_browser_open = await automator.create_ad(
                 ad_content,
                 product_info.image_paths,
                 save_as_draft=config['kleinanzeigen']['draft_mode'],
@@ -290,7 +291,18 @@ async def main_async(args: argparse.Namespace):
             raise
         
         finally:
-            await browser_controller.close()
+            if keep_browser_open:
+                logger.info("=" * 80)
+                logger.info("Browser tab kept open for your review")
+                logger.info("You can now manually review and save the draft")
+                logger.info("Close the browser tab when done")
+                logger.info("=" * 80)
+                # Don't close page, only stop playwright
+                if browser_controller.playwright:
+                    await browser_controller.playwright.stop()
+                    logger.info("Playwright stopped (browser tab remains open)")
+            else:
+                await browser_controller.close()
     
     except Exception as e:
         logger.error(f"Fatal error: {e}", exc_info=True)
