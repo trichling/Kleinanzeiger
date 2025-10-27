@@ -4,6 +4,7 @@ Main CLI application for Kleinanzeiger.
 
 import argparse
 import asyncio
+import json
 import logging
 import os
 import sys
@@ -15,7 +16,6 @@ from dotenv import load_dotenv
 from .vision.analyzer import ProductAnalyzer
 from .vision.models import VisionConfig, BrowserConfig, DelaysConfig
 from .content.generator import ContentGenerator
-from .content.categories import CategoryMapper
 from .automation.browser import BrowserController
 from .automation.kleinanzeigen import KleinanzeigenAutomator
 
@@ -142,7 +142,6 @@ async def main_async(args: argparse.Namespace):
     load_dotenv(env_path)
 
     config_path = project_root / 'config' / 'settings.yaml'
-    categories_path = project_root / 'config' / 'categories.json'
 
     # Load configuration
     config = load_config(config_path)
@@ -197,37 +196,67 @@ async def main_async(args: argparse.Namespace):
             model=content_model
         )
         logger.info(f"Using content generation backend: {content_backend}")
-        
-        # Category mapper
-        category_mapper = CategoryMapper(categories_path)
-        
+
         # Step 1: Analyze images
         logger.info("Step 1: Analyzing product images...")
         product_info = await analyzer.analyze_images(image_folder)
         logger.info(f"Product identified: {product_info.name}")
         logger.info(f"Suggested price: €{product_info.suggested_price}")
-        
-        # Step 2: Map category
-        logger.info("Step 2: Mapping category...")
-        category, subcategory = category_mapper.map_category(
-            product_info.name,
-            product_info.description,
-            product_info.category
-        )
-        logger.info(f"Category: {category}, Subcategory: {subcategory}")
-        
-        # Step 3: Generate ad content
+
+        # Debug: Output full product analysis as JSON
+        logger.debug("=" * 80)
+        logger.debug("PRODUCT ANALYSIS (Vision Backend)")
+        logger.debug("=" * 80)
+        product_analysis_json = {
+            "name": product_info.name,
+            "condition": product_info.condition,
+            "category": product_info.category,
+            "subcategory": product_info.subcategory,
+            "brand": product_info.brand,
+            "color": product_info.color,
+            "suggested_price": product_info.suggested_price,
+            "features": product_info.features,
+            "description": product_info.description,
+            "image_paths": [str(p) for p in product_info.image_paths]
+        }
+        logger.debug(json.dumps(product_analysis_json, indent=2, ensure_ascii=False))
+        logger.debug("=" * 80)
+
+        # Step 2: Skip category mapping - kleinanzeigen.de auto-detects from title
+        logger.info("Step 2: Skipping category mapping - kleinanzeigen.de will auto-detect from title")
+        logger.info(f"Vision detected category: {product_info.category}")
+
+        # Step 3: Generate ad content (simplified - just formats features)
         logger.info("Step 3: Generating ad content...")
         ad_content = generator.generate_ad_content(
             product_info,
             postal_code,
-            category,
-            subcategory,
+            product_info.category,  # Use category from vision
+            None,  # No subcategory
             price_override
         )
         logger.info(f"Ad title: {ad_content.title}")
         logger.info(f"Ad price: €{ad_content.price}")
-        
+
+        # Debug: Output full ad content as JSON
+        logger.debug("=" * 80)
+        logger.debug("GENERATED AD CONTENT (Full)")
+        logger.debug("=" * 80)
+        ad_content_json = {
+            "title": ad_content.title,
+            "category": ad_content.category,
+            "subcategory": ad_content.subcategory,
+            "condition": ad_content.condition,
+            "shipping_type": ad_content.shipping_type,
+            "price": ad_content.price,
+            "postal_code": ad_content.postal_code,
+            "description": ad_content.description,
+            "images": [{"index": idx, "filename": img_path.name, "path": str(img_path)}
+                      for idx, img_path in enumerate(product_info.image_paths, 1)]
+        }
+        logger.debug(json.dumps(ad_content_json, indent=2, ensure_ascii=False))
+        logger.debug("=" * 80)
+
         # Step 4: Connect to browser
         logger.info("Step 4: Connecting to browser...")
         logger.info("Make sure Brave is running with: brave --remote-debugging-port=9222")
@@ -244,7 +273,8 @@ async def main_async(args: argparse.Namespace):
             await automator.create_ad(
                 ad_content,
                 product_info.image_paths,
-                save_as_draft=config['kleinanzeigen']['draft_mode']
+                save_as_draft=config['kleinanzeigen']['draft_mode'],
+                auto_confirm=args.auto_confirm
             )
             
             # Take success screenshot
@@ -276,6 +306,7 @@ def main():
 Examples:
   python -m src.main --image-folder ./products/laptop --postal-code 10115
   python -m src.main --image-folder ./products/bike --postal-code 80331 --price 150
+  python -m src.main --image-folder ./products/sofa --postal-code 20095 --auto-confirm
 
 Before running:
   1. Set ANTHROPIC_API_KEY environment variable
@@ -313,7 +344,14 @@ Before running:
         default=True,
         help='Save as draft instead of publishing (default: True)'
     )
-    
+
+    parser.add_argument(
+        '--auto-confirm',
+        action='store_true',
+        default=False,
+        help='Skip confirmation prompt before saving draft (default: False)'
+    )
+
     args = parser.parse_args()
     
     # Validate postal code

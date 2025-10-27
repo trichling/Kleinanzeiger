@@ -75,31 +75,39 @@ class GeminiVisionAnalyzer(VisionAnalyzer):
         if not images:
             raise ValueError("No images could be loaded successfully")
         
-        # Create prompt
-        prompt = """Analyze these product images and extract the following information:
+        # Create prompt - ALL OUTPUT IN GERMAN
+        prompt = f"""WICHTIG: Alle {len(images)} Bilder zeigen DAS GLEICHE PRODUKT aus verschiedenen Blickwinkeln oder Details.
+Analysiere ALLE Bilder zusammen, um dieses EINE Produkt zu beschreiben.
 
-1. Product name (short and precise)
-2. Detailed product description (condition, features, notable characteristics)
-3. Condition (New, Like New, Used, Defective)
-4. Category (e.g., Electronics, Furniture, Clothing, Sports, Household)
-5. Brand/Manufacturer (if identifiable)
-6. Color (if relevant)
-7. Key features (list)
-8. Suggested price in EUR (realistic for German second-hand market)
+Falls es sich um ein Set handelt (z.B. mehrere Bücher, Spielzeuge, zusammen verkaufte Artikel), behandle das gesamte Set als EIN Produkt.
+Manche Bilder zeigen eine Übersicht, andere Details - kombiniere alle Informationen.
 
-Respond in the following JSON format:
-{
-    "name": "Product name",
-    "description": "Detailed description...",
-    "condition": "Used",
-    "category": "Category",
-    "brand": "Brand",
-    "color": "Color",
-    "features": ["Feature 1", "Feature 2"],
+Extrahiere die folgenden Informationen über dieses EINE Produkt IN DEUTSCHER SPRACHE:
+
+1. Produktname (kurz und präzise, auf Deutsch)
+2. Detaillierte Produktbeschreibung (Zustand, Merkmale, besondere Eigenschaften aus ALLEN Bildern, auf Deutsch)
+3. Zustand (Neu, Wie Neu, Gebraucht, oder Defekt)
+4. Kategorie (z.B. Elektronik, Möbel, Kleidung, Sport, Haushalt, Spielzeug)
+5. Marke/Hersteller (falls erkennbar)
+6. Farbe (falls relevant)
+7. Wichtige Merkmale (Liste, kombiniere Informationen aus allen Bildern, auf Deutsch)
+8. Vorgeschlagener Preis in EUR (realistisch für den deutschen Gebrauchtwarenmarkt)
+
+WICHTIG: Alle Texte müssen auf DEUTSCH sein!
+
+Antworte mit NUR EINEM JSON-Objekt (kein Array) in diesem Format:
+{{
+    "name": "Produktname auf Deutsch",
+    "description": "Detaillierte Beschreibung auf Deutsch, die alle Bilder kombiniert...",
+    "condition": "Gebraucht",
+    "category": "Kategorie",
+    "brand": "Marke",
+    "color": "Farbe",
+    "features": ["Merkmal 1 auf Deutsch", "Merkmal 2 auf Deutsch", "Merkmal 3 auf Deutsch"],
     "suggested_price": 50.00
-}
+}}
 
-Be precise and describe the condition honestly based on the images."""
+Gib NUR das JSON-Objekt zurück, sonst nichts. Gib KEIN Array von Objekten zurück."""
         
         # Call Gemini API
         try:
@@ -117,9 +125,29 @@ Be precise and describe the condition honestly based on the images."""
                 json_str = json_str.split("```json")[1].split("```")[0].strip()
             elif "```" in json_str:
                 json_str = json_str.split("```")[1].split("```")[0].strip()
-            
+
             data = json.loads(json_str)
-            
+
+            # Handle case where API returns a list instead of dict (despite instructions)
+            if isinstance(data, list):
+                logger.warning(f"[Gemini] API returned a list despite prompt instructions. Full response: {data}")
+                # If it's a list with one element, extract it
+                if len(data) == 1 and isinstance(data[0], dict):
+                    logger.warning(f"[Gemini] Extracting single dict from list")
+                    data = data[0]
+                # If it's multiple elements, this is wrong - multiple products detected
+                elif len(data) > 1:
+                    raise ValueError(
+                        f"[Gemini] Returned {len(data)} objects - it seems Gemini analyzed each image separately. "
+                        f"This is a bug. Expected one combined analysis. Response: {data[:2]}..."  # Show first 2 for debug
+                    )
+                else:
+                    raise ValueError(f"[Gemini] Unexpected list response: {data}")
+
+            # Ensure data is a dictionary
+            if not isinstance(data, dict):
+                raise ValueError(f"[Gemini] Expected dict, got {type(data)}: {data}")
+
             # Create ProductInfo
             product_info = ProductInfo(
                 name=data.get("name", "Unknown Product"),

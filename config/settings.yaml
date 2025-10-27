@@ -56,7 +56,7 @@ delays:
 
 # Logging
 logging:
-  level: "INFO"
+  level: "DEBUG"
   log_dir: "logs"
   screenshot_dir: "logs/screenshots"
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

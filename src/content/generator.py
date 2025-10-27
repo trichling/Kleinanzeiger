@@ -212,41 +212,85 @@ Schreibe nur die Beschreibung, ohne zusätzliche Erklärungen."""
     ) -> AdContent:
         """
         Generate complete ad content from product information.
-        
+
+        Since Gemini now outputs German content, we simply:
+        1. Use the title directly from vision analysis
+        2. Use the condition directly from vision analysis
+        3. Use the suggested price (or override)
+        4. Format features into a cohesive description
+        5. Let kleinanzeigen.de auto-detect category from the title
+
         Args:
-            product_info: Product information from analysis
+            product_info: Product information from analysis (in German from Gemini)
             postal_code: Postal code for ad location
-            category: Category for the ad
+            category: Category (optional, auto-detected from title by kleinanzeigen.de)
             subcategory: Optional subcategory
             price_override: Optional price override
-            
+
         Returns:
             Complete AdContent ready for posting
         """
         logger.info(f"Generating ad content for: {product_info.name}")
-        
-        # Generate title
-        title = self._generate_title(product_info)
-        
-        # Enhance description
-        description = self._enhance_description(product_info)
-        
+
+        # Use title directly from vision analysis (already in German)
+        title = product_info.name[:65]  # Ensure max 65 chars
+        logger.info(f"Using vision-generated title: {title}")
+
+        # Format features into a cohesive description
+        description = self._format_description_from_features(product_info)
+
         # Determine price
         price = price_override if price_override is not None else (
             product_info.suggested_price or 10.0
         )
-        
+
+        # Use category from vision analysis, fallback to provided one
+        final_category = category or product_info.category or "Sonstiges"
+
         # Create AdContent
         ad_content = AdContent(
             title=title,
             description=description,
             price=price,
-            category=category,
+            category=final_category,
             subcategory=subcategory,
             condition=product_info.condition,
             shipping_type="PICKUP",
             postal_code=postal_code
         )
-        
+
         logger.info(f"Ad content generated: '{ad_content.title}' - €{ad_content.price}")
         return ad_content
+
+    def _format_description_from_features(self, product_info: ProductInfo) -> str:
+        """
+        Format the vision analysis output into a cohesive ad description.
+        Combines the description and features from vision analysis.
+
+        Args:
+            product_info: Product information from vision analysis
+
+        Returns:
+            Formatted description for the ad
+        """
+        # Start with the vision-generated description
+        description_parts = [product_info.description]
+
+        # Add features as bullet points if available
+        if product_info.features:
+            description_parts.append("\nMerkmale:")
+            for feature in product_info.features:
+                description_parts.append(f"• {feature}")
+
+        # Add brand info if available
+        if product_info.brand:
+            description_parts.append(f"\nMarke: {product_info.brand}")
+
+        # Add color if available
+        if product_info.color:
+            description_parts.append(f"Farbe: {product_info.color}")
+
+        # Add standard pickup notice
+        description_parts.append("\nNur Abholung möglich.")
+
+        return "\n".join(description_parts)

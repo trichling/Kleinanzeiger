@@ -372,9 +372,12 @@ class KleinanzeigenAutomator:
             logger.error(f"Error uploading images: {e}")
             raise
     
-    async def save_as_draft(self) -> bool:
+    async def save_as_draft(self, auto_confirm: bool = False) -> bool:
         """
         Save the ad as a draft instead of publishing.
+
+        Args:
+            auto_confirm: If True, skip confirmation prompt and save immediately
 
         Returns:
             True if draft was saved, False if user cancelled
@@ -382,24 +385,28 @@ class KleinanzeigenAutomator:
         logger.info("Saving ad as draft")
 
         try:
-            # Show current page info for user confirmation
+            # Show current page info
             logger.info(f"Current URL: {self.page.url}")
             logger.info("Ad form has been filled and is ready to be saved as draft.")
 
-            # Add confirmation prompt - wait for user input
-            logger.warning("=" * 60)
-            logger.warning("CONFIRMATION: Ready to save ad as draft!")
-            logger.warning("=" * 60)
+            # Check if confirmation is needed
+            if not auto_confirm:
+                # Add confirmation prompt - wait for user input
+                logger.warning("=" * 60)
+                logger.warning("CONFIRMATION: Ready to save ad as draft!")
+                logger.warning("=" * 60)
 
-            # Wait for user confirmation
-            user_input = input("Type 'yes' to proceed with saving the draft (anything else to skip): ").strip().lower()
+                # Wait for user confirmation
+                user_input = input("Type 'yes' to proceed with saving the draft (anything else to skip): ").strip().lower()
 
-            if user_input != 'yes':
-                logger.info(f"User cancelled draft save (typed '{user_input}'). Skipping save.")
-                logger.info("Test completed successfully - form was filled correctly.")
-                return False
+                if user_input != 'yes':
+                    logger.info(f"User cancelled draft save (typed '{user_input}'). Skipping save.")
+                    logger.info("Test completed successfully - form was filled correctly.")
+                    return False
 
-            logger.info("Confirmation received, proceeding with save...")
+                logger.info("Confirmation received, proceeding with save...")
+            else:
+                logger.info("Auto-confirm enabled, proceeding with save without confirmation...")
 
             # Click "Entwurf speichern" (Save Draft) button
             logger.info("Clicking 'Entwurf speichern' button")
@@ -422,15 +429,16 @@ class KleinanzeigenAutomator:
             logger.warning("Could not find draft button at expected location")
             raise
     
-    async def create_ad(self, ad_content: AdContent, image_paths: List[Path], 
-                       save_as_draft: bool = True):
+    async def create_ad(self, ad_content: AdContent, image_paths: List[Path],
+                       save_as_draft: bool = True, auto_confirm: bool = False):
         """
         Create a complete ad on kleinanzeigen.de.
-        
+
         Args:
             ad_content: Ad content
             image_paths: Product images
             save_as_draft: Whether to save as draft (default True)
+            auto_confirm: Skip confirmation prompt before saving (default False)
         """
         logger.info("Starting ad creation process")
 
@@ -453,13 +461,13 @@ class KleinanzeigenAutomator:
 
         # Save as draft or publish
         if save_as_draft:
-            saved = await self.save_as_draft()
+            saved = await self.save_as_draft(auto_confirm=auto_confirm)
             if not saved:
                 logger.info("Draft save skipped by user - ad creation process completed")
                 return
         else:
             logger.warning("Publishing ad directly (not implemented - defaults to draft)")
-            saved = await self.save_as_draft()
+            saved = await self.save_as_draft(auto_confirm=auto_confirm)
             if not saved:
                 logger.info("Draft save skipped by user - ad creation process completed")
                 return
