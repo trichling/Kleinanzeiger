@@ -152,6 +152,17 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
+# TypeScript / Node.js
+node_modules/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+coverage/
+.nyc_output/
+
 # Project specific
 logs/
 *.log
