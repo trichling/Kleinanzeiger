@@ -1,45 +1,58 @@
 # Setup script for Kleinanzeiger (PowerShell)
 # Run with: .\setup.ps1
 
-Write-Host "🚀 Setting up Kleinanzeiger..." -ForegroundColor Cyan
+Write-Host "🚀 Setting up Kleinanzeiger (TypeScript)..." -ForegroundColor Cyan
 
-# Check Python version
-# Write-Host "Checking Python version..." -ForegroundColor Yellow
-# try {
-#     $pythonVersion = & python --version 2>&1 | Select-String -Pattern "(\d+\.\d+\.\d+)" | ForEach-Object { $_.Matches.Groups[1].Value }
-#     $requiredVersion = [version]"3.11.0"
-#     $currentVersion = [version]$pythonVersion
-    
-#     if ($currentVersion -lt $requiredVersion) {
-#         Write-Host "❌ Error: Python 3.11 or higher required. Found: $pythonVersion" -ForegroundColor Red
-#         exit 1
-#     }
-#     Write-Host "✅ Python version OK: $pythonVersion" -ForegroundColor Green
-# }
-# catch {
-#     Write-Host "❌ Error: Python not found. Please install Python 3.11 or higher." -ForegroundColor Red
-#     exit 1
-# }
+# Check Node.js version
+Write-Host "Checking Node.js version..." -ForegroundColor Yellow
+try {
+    $nodeVersion = & node --version 2>&1 | Select-String -Pattern "v(\d+\.\d+\.\d+)" | ForEach-Object { $_.Matches.Groups[1].Value }
+    $requiredVersion = [version]"18.0.0"
+    $currentVersion = [version]$nodeVersion
 
-# Create virtual environment
-Write-Host "Creating virtual environment..." -ForegroundColor Yellow
-pyenv virtualenv 3.14.0 kleinanzeiger
-Write-Host "✅ Virtual environment created" -ForegroundColor Green
+    if ($currentVersion -lt $requiredVersion) {
+        Write-Host "❌ Error: Node.js 18 or higher required. Found: $nodeVersion" -ForegroundColor Red
+        Write-Host "Please install Node.js from: https://nodejs.org/" -ForegroundColor Yellow
+        exit 1
+    }
+    Write-Host "✅ Node.js version OK: $nodeVersion" -ForegroundColor Green
+}
+catch {
+    Write-Host "❌ Error: Node.js not found. Please install Node.js 18 or higher." -ForegroundColor Red
+    Write-Host "Download from: https://nodejs.org/" -ForegroundColor Yellow
+    exit 1
+}
 
-# Activate virtual environment
-pyenv local kleinanzeiger
-
-# Upgrade pip
-Write-Host "Upgrading pip..." -ForegroundColor Yellow
-python -m pip install --upgrade pip
+# Check npm version
+Write-Host "Checking npm version..." -ForegroundColor Yellow
+try {
+    $npmVersion = & npm --version 2>&1
+    Write-Host "✅ npm version: $npmVersion" -ForegroundColor Green
+}
+catch {
+    Write-Host "❌ Error: npm not found. Please install Node.js which includes npm." -ForegroundColor Red
+    exit 1
+}
 
 # Install dependencies
-Write-Host "Installing dependencies..." -ForegroundColor Yellow
-pip install -r requirements.txt
+Write-Host "Installing npm dependencies..." -ForegroundColor Yellow
+npm install
 
-# Install Playwright browsers
-Write-Host "Installing Playwright browsers..." -ForegroundColor Yellow
-playwright install chromium
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Error: npm install failed" -ForegroundColor Red
+    exit 1
+}
+Write-Host "✅ Dependencies installed" -ForegroundColor Green
+
+# Build TypeScript project
+Write-Host "Building TypeScript project..." -ForegroundColor Yellow
+npm run build
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Error: Build failed" -ForegroundColor Red
+    exit 1
+}
+Write-Host "✅ TypeScript build complete" -ForegroundColor Green
 
 # Create necessary directories
 Write-Host "Creating directories..." -ForegroundColor Yellow
@@ -51,16 +64,26 @@ Write-Host "✅ Directories created" -ForegroundColor Green
 if (-not (Test-Path ".env")) {
     Write-Host "Creating .env file..." -ForegroundColor Yellow
     Copy-Item ".env.example" ".env"
-    Write-Host "⚠️  Please edit .env and add your ANTHROPIC_API_KEY" -ForegroundColor Yellow
+    Write-Host "⚠️  Please edit .env and add your API keys:" -ForegroundColor Yellow
+    Write-Host "   - GEMINI_API_KEY (for Gemini vision)" -ForegroundColor Yellow
+    Write-Host "   - ANTHROPIC_API_KEY (for Claude vision, optional)" -ForegroundColor Yellow
+    Write-Host "   - OPENAI_API_KEY (for OpenAI vision, optional)" -ForegroundColor Yellow
+}
+else {
+    Write-Host "✅ .env file already exists" -ForegroundColor Green
 }
 
 Write-Host ""
 Write-Host "✅ Setup complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
-Write-Host "1. Edit .env and add your ANTHROPIC_API_KEY"
+Write-Host "1. Edit .env and add your API key(s) (at minimum GEMINI_API_KEY)"
 Write-Host "2. Start Brave with: & 'C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe' --remote-debugging-port=9222"
 Write-Host "3. Login to kleinanzeigen.de in the browser"
-Write-Host "4. Run: python -m src.main --image-folder ./products/example --postal-code 10115"
+Write-Host "4. Run: npm start -- --image-folder ./products/example --postal-code 10115"
 Write-Host ""
-Write-Host "Run '.\venv\Scripts\Activate.ps1' to activate the virtual environment" -ForegroundColor Yellow
+Write-Host "Available commands:" -ForegroundColor Cyan
+Write-Host "  npm start          - Run the application"
+Write-Host "  npm test           - Run tests"
+Write-Host "  npm run build      - Build TypeScript"
+Write-Host ""
