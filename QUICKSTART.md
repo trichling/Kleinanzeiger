@@ -22,6 +22,10 @@ cd Kleinanzeiger
 & "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" --remote-debugging-port=9222
 ```
 
+```powershell
+Start-Process "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" -ArgumentList "--remote-debugging-port=9222"  
+```
+
 **Windows (PowerShell):**
 ```powershell
 # Einfachste Methode: Helper-Script verwenden
