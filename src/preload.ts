@@ -8,4 +8,5 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('electronAPI', {
   openFolderDialog: () => ipcRenderer.invoke('dialog:openFolder'),
   scanFolder: (folderPath: string) => ipcRenderer.invoke('images:scanFolder', folderPath),
+  getImagePreview: (imagePath: string) => ipcRenderer.invoke('images:getPreview', imagePath),
 });

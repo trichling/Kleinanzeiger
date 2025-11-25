@@ -60,13 +60,36 @@ ipcMain.handle('dialog:openFolder', async () => {
   return { canceled: false, folderPath: result.filePaths[0] };
 });
 
-ipcMain.handle('images:scanFolder', async (_event, folderPath: string) => {
+ipcMain.handle('images:getPreview', async (_event, imagePath: string) => {
+  try {
+    const imageBuffer = await fs.readFile(imagePath);
+    const ext = path.extname(imagePath).toLowerCase();
+
+    // Determine MIME type
+    const mimeTypes: Record<string, string> = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+      '.bmp': 'image/bmp',
+    };
+
+    const mimeType = mimeTypes[ext] || 'image/jpeg';
+    const base64 = imageBuffer.toString('base64');
+
+    return { success: true, dataUrl: `data:${mimeType};base64,${base64}` };
+  } catch (error) {
+    console.error('Error loading image preview:', error);
+    return { success: false, error: (error as Error).message };
+  }
+}); ipcMain.handle('images:scanFolder', async (_event, folderPath: string) => {
   try {
     console.log(`Scanning folder: ${folderPath}`);
-    
+
     const SUPPORTED_WEB_FORMATS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']);
     const maxImages = 10;
-    
+
     const stats = await fs.stat(folderPath);
     if (!stats.isDirectory()) {
       throw new Error(`Path is not a directory: ${folderPath}`);
@@ -133,8 +156,8 @@ ipcMain.handle('images:scanFolder', async (_event, folderPath: string) => {
     if (images.length === 0) {
       throw new Error(
         `No uploadable images found in ${folderPath}. ` +
-          `Supported formats: ${Array.from(SUPPORTED_WEB_FORMATS).join(', ')}. ` +
-          `HEIC files will be automatically converted to JPEG.`
+        `Supported formats: ${Array.from(SUPPORTED_WEB_FORMATS).join(', ')}. ` +
+        `HEIC files will be automatically converted to JPEG.`
       );
     }
 

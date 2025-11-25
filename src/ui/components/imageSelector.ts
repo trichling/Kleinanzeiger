@@ -92,12 +92,10 @@ async function scanFolder(folderPath: string): Promise<void> {
         discoveredImages = images;
 
         // Show images in grid
-        displayImages(images);
+        await displayImages(images);
 
         // Update count
-        updateImageCount(images.length);
-
-        // Enable analyze button
+        updateImageCount(images.length);        // Enable analyze button
         const analyzeButton = document.getElementById('analyzeImagesButton') as HTMLButtonElement;
         if (analyzeButton) {
             analyzeButton.disabled = false;
@@ -116,23 +114,33 @@ async function scanFolder(folderPath: string): Promise<void> {
 /**
  * Display images in the grid
  */
-function displayImages(images: ImageInfo[]): void {
+async function displayImages(images: ImageInfo[]): Promise<void> {
     const imageGrid = document.getElementById('imageGrid');
     if (!imageGrid) return;
 
     imageGrid.innerHTML = '';
 
-    images.forEach((img, index) => {
+    // Load all image previews
+    for (const img of images) {
         const imageCard = document.createElement('div');
         imageCard.className = 'image-card';
 
         const imgElement = document.createElement('img');
-        imgElement.src = `file://${img.path}`;
         imgElement.alt = img.name;
-        imgElement.onerror = () => {
+
+        // Load image preview via IPC
+        try {
+            const result = await (window as any).electronAPI.getImagePreview(img.path);
+            if (result.success) {
+                imgElement.src = result.dataUrl;
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (error) {
+            console.error(`Failed to load preview for ${img.name}:`, error);
             // Fallback for image load errors
-            imgElement.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23ddd"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">Image</text></svg>';
-        };
+            imgElement.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23ddd"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">Error</text></svg>';
+        }
 
         const nameLabel = document.createElement('p');
         nameLabel.className = 'image-name';
@@ -148,7 +156,7 @@ function displayImages(images: ImageInfo[]): void {
         imageCard.appendChild(imgElement);
         imageCard.appendChild(nameLabel);
         imageGrid.appendChild(imageCard);
-    });
+    }
 }
 
 /**
