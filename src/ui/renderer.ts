@@ -4,9 +4,9 @@
  */
 
 import { loadAndRenderComponent } from './components';
-import { setupMainScreen, showStatusMessage } from './components/main';
-import { setupSettingsPanel } from './components/settings';
-import { setupImageSelector, resetImageSelector, type ImageInfo } from './components/imageSelector';
+import { setupMainScreen, showStatusMessage } from './components/main/main.js';
+import { setupSettingsPanel } from './components/settings/settings.js';
+import { setupImageSelector, resetImageSelector, type ImageInfo } from './components/imageSelector/imageSelector.js';
 
 console.log('Kleinanzeiger renderer process loaded');
 
@@ -78,9 +78,9 @@ function handleAnalyzeImages(folderPath: string, images: ImageInfo[]): void {
 async function init(): Promise<void> {
   try {
     // Load components
-    await loadAndRenderComponent('mainScreen', '/components/main.html');
-    await loadAndRenderComponent('settingsPanel', '/components/settings.html');
-    await loadAndRenderComponent('imageSelectorPanel', '/components/imageSelector.html');
+    await loadAndRenderComponent('mainScreen', '/components/main/main.html');
+    await loadAndRenderComponent('settingsPanel', '/components/settings/settings.html');
+    await loadAndRenderComponent('imageSelectorPanel', '/components/imageSelector/imageSelector.html');
 
     // Setup component event listeners
     setupMainScreen(handleSettingsClick, handleCreateAdClick);
