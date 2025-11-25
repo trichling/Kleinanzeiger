@@ -1,0 +1,72 @@
+<div class="settings-header">
+    <h2>Settings</h2>
+    <button class="back-button" id="backButton">← Back</button>
+</div>
+
+<div class="section-title">AI Vision Backend</div>
+<div class="form-group">
+    <label for="visionBackend">Vision Backend</label>
+    <select id="visionBackend">
+        <option value="openai">OpenAI GPT-4 Vision</option>
+        <option value="claude">Anthropic Claude</option>
+        <option value="gemini">Google Gemini</option>
+        <option value="blip2">BLIP-2 (Local)</option>
+    </select>
+    <small>Choose which AI service to use for image analysis</small>
+</div>
+
+<div class="form-group">
+    <label for="apiKey">API Key</label>
+    <input type="password" id="apiKey" placeholder="Enter your API key">
+    <small>Your API key is stored locally and never shared</small>
+</div>
+
+<div class="section-title">kleinanzeigen.de Settings</div>
+<div class="form-group">
+    <label for="username">Username/Email</label>
+    <input type="text" id="username" placeholder="your@email.com">
+</div>
+
+<div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Enter password">
+</div>
+
+<div class="section-title">Browser Automation</div>
+<div class="form-group">
+    <label for="browserPath">Browser Path (Optional)</label>
+    <input type="text" id="browserPath" placeholder="/Applications/Brave Browser.app">
+    <small>Leave empty to use the default browser</small>
+</div>
+
+<div class="form-group">
+    <label for="headless">Headless Mode</label>
+    <select id="headless">
+        <option value="false">No (Show browser)</option>
+        <option value="true">Yes (Hide browser)</option>
+    </select>
+    <small>Run browser automation in the background</small>
+</div>
+
+<div class="section-title">Product Defaults</div>
+<div class="form-group">
+    <label for="defaultCategory">Default Category</label>
+    <select id="defaultCategory">
+        <option value="">-- Select Category --</option>
+        <option value="Familie, Kind & Baby">Familie, Kind & Baby</option>
+        <option value="Elektronik">Elektronik</option>
+        <option value="Haus & Garten">Haus & Garten</option>
+        <option value="Freizeit, Hobby & Nachbarschaft">Freizeit, Hobby & Nachbarschaft</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="defaultShipping">Shipping Options</label>
+    <select id="defaultShipping">
+        <option value="pickup">Pickup only</option>
+        <option value="shipping">Shipping available</option>
+        <option value="both">Both</option>
+    </select>
+</div>
+
+<button id="saveSettingsButton">Save Settings</button>
