@@ -1,0 +1,49 @@
+<div class="image-selector-header">
+    <button id="backToMainButton" class="back-button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back
+    </button>
+    <h2>Select Image Folder</h2>
+</div>
+
+<div class="image-selector-content">
+    <div class="folder-selection">
+        <div class="form-group">
+            <label for="imageFolderPath">Image Folder Path</label>
+            <div class="folder-input-group">
+                <input type="text" id="imageFolderPath" placeholder="e.g., /Users/yourname/products/laptop" readonly />
+                <button id="browseFolderButton" class="primary-button">Browse...</button>
+            </div>
+            <small class="help-text">
+                Select a folder containing your product images.
+                HEIC files will be automatically converted to JPEG.
+            </small>
+        </div>
+    </div>
+
+    <div id="imagePreviewSection" class="image-preview-section hidden">
+        <h3>Found Images</h3>
+        <div id="imageGrid" class="image-grid">
+            <!-- Images will be dynamically loaded here -->
+        </div>
+        <div class="image-info">
+            <p id="imageCount">0 images found</p>
+            <p class="help-text">Supported formats: JPG, JPEG, PNG, GIF, WebP, BMP. HEIC/HEIF will be converted.</p>
+        </div>
+    </div>
+
+    <div id="conversionProgress" class="conversion-progress hidden">
+        <div class="progress-bar">
+            <div id="progressBarFill" class="progress-bar-fill"></div>
+        </div>
+        <p id="conversionStatus">Converting HEIC files...</p>
+    </div>
+
+    <div class="action-buttons">
+        <button id="analyzeImagesButton" class="primary-button" disabled>
+            Analyze Images & Create Ad
+        </button>
+    </div>
+</div>

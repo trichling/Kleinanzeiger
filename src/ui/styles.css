@@ -15,13 +15,30 @@ body {
 }
 
 .container {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    max-width: 800px;
     width: 100%;
+    height: 100vh;
     position: relative;
+}
+
+/* Screen panels */
+#mainScreen,
+#settingsPanel,
+#imageSelectorPanel {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+#mainScreen.active,
+#settingsPanel.active,
+#imageSelectorPanel.active {
+    display: block;
+}
+
+/* Main screen specific styles */
+#mainScreen {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .header {
@@ -142,20 +159,8 @@ button:active {
 
 /* Settings Panel */
 .settings-panel {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     background: white;
-    border-radius: 20px;
     padding: 40px;
-    overflow-y: auto;
-}
-
-.settings-panel.active {
-    display: block;
 }
 
 .settings-header {
@@ -226,4 +231,188 @@ button:active {
 
 .section-title:first-child {
     margin-top: 0;
+}
+
+/* Image Selector Styles */
+#imageSelectorPanel {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+}
+
+#imageSelectorPanel h2 {
+    color: white;
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.image-selector-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+#imageSelectorPanel .back-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#imageSelectorPanel .back-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateX(-2px);
+}
+
+.image-selector-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.folder-selection {
+    margin-bottom: 2rem;
+}
+
+.folder-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.folder-input-group input {
+    flex: 1;
+}
+
+.image-preview-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.image-preview-section.hidden {
+    display: none;
+}
+
+.image-preview-section h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.image-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.image-card:hover {
+    transform: scale(1.05);
+}
+
+.image-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.image-name {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    word-break: break-word;
+}
+
+.converted-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    background: #10b981;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    color: white;
+}
+
+.image-info {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.image-info p {
+    margin: 0.5rem 0;
+}
+
+.conversion-progress {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.conversion-progress.hidden {
+    display: none;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 4px;
+    width: 50%;
+    transition: width 0.3s;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+#conversionStatus {
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    margin: 0;
+}
+
+.action-buttons {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.action-buttons button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.action-buttons button:disabled:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }

@@ -4,12 +4,12 @@
   "description": "Automated Classified Ad Generator for kleinanzeigen.de",
   "main": ".vite/build/main.js",
   "bin": {
-    "kleinanzeiger": "./dist/main.js"
+    "kleinanzeiger": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsx src/main.ts",
-    "start": "node dist/main.js",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
     "postinstall": "electron-builder install-app-deps",
     "electron:start": "electron-forge start",
     "electron:package": "electron-forge package",

@@ -63,10 +63,10 @@ ipcMain.handle('dialog:openFolder', async () => {
 ipcMain.handle('images:scanFolder', async (_event, folderPath: string) => {
   try {
     console.log(`Scanning folder: ${folderPath}`);
-    
+
     const SUPPORTED_WEB_FORMATS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']);
     const maxImages = 10;
-    
+
     const stats = await fs.stat(folderPath);
     if (!stats.isDirectory()) {
       throw new Error(`Path is not a directory: ${folderPath}`);
@@ -133,8 +133,8 @@ ipcMain.handle('images:scanFolder', async (_event, folderPath: string) => {
     if (images.length === 0) {
       throw new Error(
         `No uploadable images found in ${folderPath}. ` +
-          `Supported formats: ${Array.from(SUPPORTED_WEB_FORMATS).join(', ')}. ` +
-          `HEIC files will be automatically converted to JPEG.`
+        `Supported formats: ${Array.from(SUPPORTED_WEB_FORMATS).join(', ')}. ` +
+        `HEIC files will be automatically converted to JPEG.`
       );
     }
 

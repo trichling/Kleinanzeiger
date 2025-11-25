@@ -6,6 +6,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { ProductInfo, VisionConfig } from './models.js';
 import { createLogger } from '../utils/logger.js';
+import { convertHeicToJpeg } from '../utils/heicConverter.js';
 
 const logger = createLogger('VisionAnalyzer');
 
@@ -39,51 +40,7 @@ export abstract class VisionAnalyzer {
    */
   abstract getSupportedFormats(): string[];
 
-  /**
-   * Convert HEIC/HEIF image to JPEG format.
-   */
-  private async convertHeicToJpeg(heicPath: string): Promise<string> {
-    try {
-      logger.info(`Converting HEIC to JPEG: ${path.basename(heicPath)}`);
 
-      // Create output path with .jpg extension
-      const jpegPath = heicPath.replace(/\.(heic|heif)$/i, '.jpg');
-
-      // Check if JPEG already exists and is valid
-      try {
-        const stats = await fs.stat(jpegPath);
-        if (stats.size > 0) {
-          logger.debug(`JPEG already exists: ${path.basename(jpegPath)}`);
-          return jpegPath;
-        }
-      } catch (error) {
-        // File doesn't exist, proceed with conversion
-      }
-
-      // Read HEIC file
-      const heicBuffer = await fs.readFile(heicPath);
-
-      // Convert using heic-convert (pure JavaScript, no native dependencies)
-      // @ts-expect-error heic-convert has no type definitions
-      const convert = (await import('heic-convert')).default;
-      const jpegBuffer = await convert({
-        buffer: heicBuffer,
-        format: 'JPEG',
-        quality: 0.95,
-      });
-
-      // Write JPEG file
-      await fs.writeFile(jpegPath, Buffer.from(jpegBuffer));
-
-      logger.info(`Converted HEIC to JPEG: ${path.basename(heicPath)} -> ${path.basename(jpegPath)}`);
-      return jpegPath;
-    } catch (error) {
-      logger.error(`Failed to convert HEIC file ${path.basename(heicPath)}: ${error}`);
-      throw new Error(
-        `Failed to convert HEIC file. Error: ${error}`
-      );
-    }
-  }
 
   /**
    * Find all supported images in a folder.
@@ -117,7 +74,7 @@ export abstract class VisionAnalyzer {
       // Convert HEIC/HEIF files to JPEG
       if (['.heic', '.heif'].includes(ext)) {
         try {
-          const jpegPath = await this.convertHeicToJpeg(filePath);
+          const jpegPath = await convertHeicToJpeg(filePath);
           convertedJpegs.add(path.basename(jpegPath));
           logger.info(`HEIC file converted successfully: ${path.basename(jpegPath)}`);
         } catch (error) {
@@ -156,8 +113,8 @@ export abstract class VisionAnalyzer {
     if (imagePaths.length === 0) {
       throw new Error(
         `No uploadable images found in ${imageFolder}. ` +
-          `Supported formats: ${Array.from(SUPPORTED_WEB_FORMATS).join(', ')}. ` +
-          `HEIC files will be automatically converted to JPEG.`
+        `Supported formats: ${Array.from(SUPPORTED_WEB_FORMATS).join(', ')}. ` +
+        `HEIC files will be automatically converted to JPEG.`
       );
     }
 

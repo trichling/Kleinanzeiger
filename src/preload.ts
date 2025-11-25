@@ -6,12 +6,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Add your IPC channels here
-  // Example:
-  // send: (channel: string, data: any) => {
-  //   const validChannels = ['toMain'];
-  //   if (validChannels.includes(channel)) {
-  //     ipcRenderer.send(channel, data);
-  //   }
-  // },
+  openFolderDialog: () => ipcRenderer.invoke('dialog:openFolder'),
+  scanFolder: (folderPath: string) => ipcRenderer.invoke('images:scanFolder', folderPath),
 });
