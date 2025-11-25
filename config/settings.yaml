@@ -7,7 +7,7 @@ anthropic:
 
 # Browser Configuration
 browser:
-  cdp_url: "http://127.0.0.1:9222"  # Use explicit IPv4 to avoid IPv6 issues
+  cdp_url: "http://localhost:9222"
   headless: false
   timeout: 30000
   screenshot_on_error: true
@@ -18,32 +18,13 @@ kleinanzeigen:
   shipping_type: "PICKUP" # Nur Abholung
   draft_mode: true # Save as draft, don't publish
 
-# Content Generation - Multi-Backend Support
+# Content Generation
 content:
-  # Backend selection: 'claude', 'gemini', 'openai', 'simple'
-  # 'simple' = template-based generation (no AI, no API key needed)
-  backend: "gemini" # Using same backend as vision
-
   max_title_length: 65
   default_condition: "Gebraucht"
   price_suggestions:
     - "Verhandlungsbasis"
     - "Festpreis"
-
-  # Claude (Anthropic) for content generation
-  claude:
-    api_key: ${ANTHROPIC_API_KEY}
-    model: "claude-3-5-sonnet-20241022"
-
-  # Gemini (Google) for content generation
-  gemini:
-    api_key: ${GEMINI_API_KEY}
-    model: "gemini-2.5-flash"  # Latest stable model
-
-  # OpenAI for content generation
-  openai:
-    api_key: ${OPENAI_API_KEY}
-    model: "gpt-4-turbo-preview"
 
 # Delays (in milliseconds) for human-like interaction
 delays:
@@ -56,7 +37,7 @@ delays:
 
 # Logging
 logging:
-  level: "DEBUG"
+  level: "INFO"
   log_dir: "logs"
   screenshot_dir: "logs/screenshots"
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -64,11 +45,10 @@ logging:
 # Image Analysis - Multi-Backend Support
 vision:
   # Backend selection: 'claude', 'blip2', 'openai', 'gemini'
-  backend: "gemini" # Default to free local model
+  backend: "blip2" # Default to free local model
 
   # Common settings for all backends
   supported_formats: [".jpg", ".jpeg", ".png", ".webp"]
-  # Note: HEIC/HEIF files are automatically converted to JPEG
   max_images_per_ad: 10
   resize_threshold: 5242880 # 5MB
 
@@ -94,4 +74,4 @@ vision:
   # Google Gemini Vision settings
   gemini:
     api_key: ${GEMINI_API_KEY}
-    model: "gemini-2.5-flash"  # Latest stable model with vision support
+    model: "gemini-pro-vision"

@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Kleinanzeiger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .status {
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .status-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 5px;
+        }
+
+        .status-text {
+            color: #475569;
+            font-size: 0.95em;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .feature-list li {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8fafc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Kleinanzeiger</h1>
+        <p class="subtitle">Automated Classified Ad Generator</p>
+
+        <div class="status">
+            <div class="status-title">Status</div>
+            <div class="status-text">Electron UI is running successfully!</div>
+        </div>
+
+        <div>
+            <h3 style="margin-bottom: 15px; color: #333;">Next Steps:</h3>
+            <ul class="feature-list">
+                <li>Backend selection</li>
+                <li>API key management</li>
+                <li>Image selection</li>
+                <li>Ad preview</li>
+                <li>Browser automation with CDP</li>
+            </ul>
+        </div>
+
+        <button id="testButton">Test Button</button>
+
+        <script type="module" src="/src/renderer.ts"></script>
+    </div>
+</body>
+
+</html>
