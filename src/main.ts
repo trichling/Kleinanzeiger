@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import { registerImageHandlers } from './ui/components/imageSelector/handlers.js';
+import { registerVisionHandlers } from './ui/components/vision/handlers.js';
 
 //Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -50,6 +51,7 @@ console.log('========= ELECTRON MAIN PROCESS STARTED =========');
 
 // Register IPC handlers
 registerImageHandlers();
+registerVisionHandlers();
 console.log('App ready?', app.isReady());
 
 // This method will be called when Electron has finished

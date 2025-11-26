@@ -1,0 +1,74 @@
+<div class="vision-container">
+    <h2>Analyzing Images</h2>
+
+    <!-- Progress Section -->
+    <div id="analysisProgress" class="progress-section">
+        <div class="spinner"></div>
+        <p id="analysisStatus">Starting analysis...</p>
+    </div>
+
+    <!-- Results Section -->
+    <div id="analysisResults" class="results-section hidden">
+        <h3>Analysis Complete</h3>
+
+        <div class="result-card">
+            <div class="result-row">
+                <label>Title:</label>
+                <input type="text" id="productTitle" class="result-input" maxlength="65" />
+                <span class="char-count"><span id="titleCharCount">0</span>/65</span>
+            </div>
+
+            <div class="result-row">
+                <label>Description:</label>
+                <textarea id="productDescription" class="result-textarea" rows="8"></textarea>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-row">
+                    <label>Price (EUR):</label>
+                    <input type="number" id="productPrice" class="result-input" min="0" step="0.01" />
+                </div>
+
+                <div class="result-row">
+                    <label>Condition:</label>
+                    <input type="text" id="productCondition" class="result-input" />
+                </div>
+
+                <div class="result-row">
+                    <label>Category:</label>
+                    <input type="text" id="productCategory" class="result-input" />
+                </div>
+
+                <div class="result-row" id="brandRow" style="display: none;">
+                    <label>Brand:</label>
+                    <input type="text" id="productBrand" class="result-input" readonly />
+                </div>
+
+                <div class="result-row" id="colorRow" style="display: none;">
+                    <label>Color:</label>
+                    <input type="text" id="productColor" class="result-input" readonly />
+                </div>
+            </div>
+
+            <div class="result-row" id="featuresRow" style="display: none;">
+                <label>Features:</label>
+                <ul id="productFeatures" class="features-list"></ul>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="editMoreButton" class="secondary-button">Edit More</button>
+            <button id="createAdButton" class="primary-button">Create Ad</button>
+        </div>
+    </div>
+
+    <!-- Error Section -->
+    <div id="analysisError" class="error-section hidden">
+        <h3>Analysis Failed</h3>
+        <p id="errorMessage" class="error-message"></p>
+        <button id="retryButton" class="secondary-button">Try Again</button>
+        <button id="backFromErrorButton" class="secondary-button">Back to Selection</button>
+    </div>
+
+    <button id="backFromVisionButton" class="back-button">← Back</button>
+</div>
