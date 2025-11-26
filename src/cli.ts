@@ -162,7 +162,7 @@ Before running:
     };
 
     // Initialize ProductAnalyzer with vision settings
-    const analyzer = new ProductAnalyzer(config.vision);
+    const analyzer = await ProductAnalyzer.create(config.vision);
     logger.info(`Using vision backend: ${analyzer.backendName}`);
 
     const generator = new ContentGenerator();

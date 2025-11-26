@@ -18,9 +18,18 @@ const logger = createLogger('ProductAnalyzer');
 export class ProductAnalyzer {
   private backend: VisionAnalyzer;
 
-  constructor(visionSettings: VisionConfig) {
-    this.backend = VisionAnalyzerFactory.createFromSettings({ vision: visionSettings });
+  private constructor(backend: VisionAnalyzer) {
+    this.backend = backend;
     logger.info(`ProductAnalyzer initialized with backend: ${this.backend.backendName}`);
+  }
+
+  /**
+   * Create a ProductAnalyzer instance from vision settings.
+   * Uses the factory to create the appropriate backend analyzer.
+   */
+  static async create(visionSettings: VisionConfig): Promise<ProductAnalyzer> {
+    const backend = await VisionAnalyzerFactory.createFromSettings({ vision: visionSettings });
+    return new ProductAnalyzer(backend);
   }
 
   /**
