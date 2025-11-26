@@ -74,4 +74,4 @@ vision:
   # Google Gemini Vision settings
   gemini:
     api_key: ${GEMINI_API_KEY}
-    model: "gemini-pro-vision"
+    model: "gemini-2.5-flash"

@@ -32,7 +32,22 @@ export class GeminiVisionAnalyzer extends VisionAnalyzer {
   constructor(config: VisionConfig) {
     super(config);
     const apiKey = config.gemini?.apiKey || '';
-    const modelName = config.gemini?.model || 'gemini-2.5-flash';
+    let modelName = config.gemini?.model || 'gemini-2.5-flash';
+
+    // Migrate deprecated model names to working ones
+    const modelMigrations: Record<string, string> = {
+      'gemini-pro-vision': 'gemini-2.5-flash',
+      'gemini-1.5-flash': 'gemini-2.5-flash',
+      'gemini-1.5-pro': 'gemini-2.5-pro',
+      'gemini-1.5-flash-latest': 'gemini-flash-latest',
+      'gemini-1.5-pro-latest': 'gemini-pro-latest',
+    };
+
+    if (modelMigrations[modelName]) {
+      logger.info(`Migrating model ${modelName} to ${modelMigrations[modelName]}`);
+      modelName = modelMigrations[modelName];
+    }
+
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({ model: modelName });
   }
@@ -135,7 +150,7 @@ Gib NUR das JSON-Objekt zurück, sonst nichts. Gib KEIN Array von Objekten zurü
         } else if (data.length > 1) {
           throw new Error(
             `[Gemini] Returned ${data.length} objects - it seems Gemini analyzed each image separately. ` +
-              `Expected one combined analysis. Response: ${JSON.stringify(data.slice(0, 2))}...`
+            `Expected one combined analysis. Response: ${JSON.stringify(data.slice(0, 2))}...`
           );
         } else {
           throw new Error(`[Gemini] Unexpected list response: ${JSON.stringify(data)}`);

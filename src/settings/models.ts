@@ -142,13 +142,13 @@ export const DEFAULT_SETTINGS: AppSettings = {
     format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
   },
   vision: {
-    backend: 'gemini',
+    backend: 'openai', // Changed from 'gemini' - use OpenAI as default or 'blip2' for free local option
     supportedFormats: ['.jpg', '.jpeg', '.png', '.webp'],
     maxImagesPerAd: 10,
     resizeThreshold: 5242880, // 5MB
     gemini: {
       apiKey: '',
-      model: 'gemini-pro-vision',
+      model: 'gemini-2.5-flash', // Stable Gemini 2.5 Flash model
       maxOutputTokens: 2000,
     },
     claude: {
