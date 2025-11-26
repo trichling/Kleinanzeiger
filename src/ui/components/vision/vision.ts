@@ -20,58 +20,75 @@ export interface ProductInfo {
 
 let currentProductInfo: ProductInfo | null = null;
 let currentFolderPath: string = '';
+let currentImagePaths: string[] = [];
 
 /**
  * Setup vision analysis component
  */
 export function setupVisionAnalysis(
     onBack: () => void,
-    onCreate: (productInfo: ProductInfo) => void
+    onCreate: (productInfo: ProductInfo, imagePaths: string[]) => void
 ): void {
+    const visionContainer = document.querySelector('.vision-container');
     const backButton = document.getElementById('backFromVisionButton');
-    const createAdButton = document.getElementById('createAdButton');
-    const retryButton = document.getElementById('retryButton');
-    const backFromErrorButton = document.getElementById('backFromErrorButton');
-    const editMoreButton = document.getElementById('editMoreButton');
+
+    console.log('Vision component setup - using event delegation');
 
     backButton?.addEventListener('click', onBack);
 
-    createAdButton?.addEventListener('click', () => {
-        if (currentProductInfo) {
-            // Collect edited values from form
-            const title = (document.getElementById('productTitle') as HTMLInputElement)?.value;
-            const description = (document.getElementById('productDescription') as HTMLTextAreaElement)?.value;
-            const price = parseFloat((document.getElementById('productPrice') as HTMLInputElement)?.value || '0');
-            const condition = (document.getElementById('productCondition') as HTMLInputElement)?.value;
-            const category = (document.getElementById('productCategory') as HTMLInputElement)?.value;
+    // Use event delegation on the container which is always in the DOM
+    visionContainer?.addEventListener('click', (event) => {
+        const target = event.target as HTMLElement;
 
-            const updatedInfo: ProductInfo = {
-                ...currentProductInfo,
-                name: title,
-                description,
-                suggestedPrice: price,
-                condition,
-                category
-            };
+        // Handle Create Ad button
+        if (target.id === 'createAdButton') {
+            console.log('Create Ad button clicked!');
+            console.log('Current product info:', currentProductInfo);
+            console.log('Current image paths:', currentImagePaths);
 
-            onCreate(updatedInfo);
+            if (currentProductInfo) {
+                // Collect edited values from form
+                const title = (document.getElementById('productTitle') as HTMLInputElement)?.value;
+                const description = (document.getElementById('productDescription') as HTMLTextAreaElement)?.value;
+                const price = Number.parseFloat((document.getElementById('productPrice') as HTMLInputElement)?.value || '0');
+                const condition = (document.getElementById('productCondition') as HTMLInputElement)?.value;
+                const category = (document.getElementById('productCategory') as HTMLInputElement)?.value;
+
+                const updatedInfo: ProductInfo = {
+                    ...currentProductInfo,
+                    name: title,
+                    description,
+                    suggestedPrice: price,
+                    condition,
+                    category
+                };
+
+                console.log('Calling onCreate with:', updatedInfo, currentImagePaths);
+                onCreate(updatedInfo, currentImagePaths);
+            } else {
+                console.error('No product info available');
+            }
         }
-    });
 
-    retryButton?.addEventListener('click', async () => {
-        if (currentFolderPath) {
-            await startAnalysis(currentFolderPath, []);
+        // Handle Retry button
+        if (target.id === 'retryButton') {
+            if (currentFolderPath) {
+                startAnalysis(currentFolderPath, []);
+            }
         }
-    });
 
-    backFromErrorButton?.addEventListener('click', onBack);
+        // Handle Back from Error button
+        if (target.id === 'backFromErrorButton') {
+            onBack();
+        }
 
-    editMoreButton?.addEventListener('click', () => {
-        // Allow editing by enabling fields
-        const inputs = document.querySelectorAll('.result-input, .result-textarea');
-        inputs.forEach(input => {
-            (input as HTMLInputElement | HTMLTextAreaElement).removeAttribute('readonly');
-        });
+        // Handle Edit More button
+        if (target.id === 'editMoreButton') {
+            const inputs = document.querySelectorAll('.result-input, .result-textarea');
+            for (const input of inputs) {
+                (input as HTMLInputElement | HTMLTextAreaElement).removeAttribute('readonly');
+            }
+        }
     });
 
     // Character counter for title
@@ -104,6 +121,7 @@ export async function startAnalysis(folderPath: string, images: ImageInfo[]): Pr
         }
 
         currentProductInfo = result.productInfo;
+        currentImagePaths = result.productInfo.imagePaths || [];
         displayResults(result.productInfo);
 
     } catch (error) {

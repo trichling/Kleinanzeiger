@@ -24,7 +24,8 @@ body {
 #mainScreen,
 #settingsPanel,
 #imageSelectorPanel,
-#visionPanel {
+#visionPanel,
+#adContentPanel {
     display: none;
     width: 100%;
     height: 100vh;
@@ -34,7 +35,8 @@ body {
 #mainScreen.active,
 #settingsPanel.active,
 #imageSelectorPanel.active,
-#visionPanel.active {
+#visionPanel.active,
+#adContentPanel.active {
     display: block;
 }
 
