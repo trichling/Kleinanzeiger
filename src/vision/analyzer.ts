@@ -5,6 +5,7 @@
 import { VisionAnalyzer } from './base.js';
 import { VisionAnalyzerFactory } from './factory.js';
 import { ProductInfo, VisionConfig } from './models.js';
+import type { VisionSettings } from '../settings/models.js';
 import { createLogger } from '../utils/logger.js';
 
 const logger = createLogger('ProductAnalyzer');
@@ -16,7 +17,7 @@ const logger = createLogger('ProductAnalyzer');
  * support multiple vision backends (Gemini, Claude, OpenAI, BLIP-2).
  */
 export class ProductAnalyzer {
-  private backend: VisionAnalyzer;
+  private readonly backend: VisionAnalyzer;
 
   private constructor(backend: VisionAnalyzer) {
     this.backend = backend;
@@ -26,8 +27,9 @@ export class ProductAnalyzer {
   /**
    * Create a ProductAnalyzer instance from vision settings.
    * Uses the factory to create the appropriate backend analyzer.
+   * Accepts either VisionConfig or VisionSettings (unified settings model).
    */
-  static async create(visionSettings: VisionConfig): Promise<ProductAnalyzer> {
+  static async create(visionSettings: VisionConfig | VisionSettings): Promise<ProductAnalyzer> {
     const backend = await VisionAnalyzerFactory.createFromSettings({ vision: visionSettings });
     return new ProductAnalyzer(backend);
   }

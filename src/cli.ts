@@ -5,11 +5,10 @@
 
 import { Command } from 'commander';
 import { config as loadEnv } from 'dotenv';
-import fs from 'fs';
 import { homedir } from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import YAML from 'yaml';
+import { loadSettingsFromFile } from './settings/loader.js';
 import { ProductAnalyzer } from './vision/analyzer.js';
 import { ContentGenerator } from './content/generator.js';
 import { BrowserController } from './automation/browser.js';
@@ -26,57 +25,7 @@ const projectRoot = path.resolve(__dirname, '..');
 const envPath = path.join(projectRoot, '.env');
 loadEnv({ path: envPath });
 
-/**
- * Load configuration from YAML file.
- */
-function loadConfig(configPath: string): any {
-  const fileContents = fs.readFileSync(configPath, 'utf8');
-  const config = YAML.parse(fileContents);
 
-  // Expand environment variables for vision backends
-  const expandEnvVar = (value: any): any => {
-    if (typeof value === 'string' && value.startsWith('${') && value.endsWith('}')) {
-      const envVar = value.slice(2, -1);
-      const envValue = process.env[envVar];
-      if (!envValue) {
-        return null;
-      }
-      return envValue;
-    }
-    return value;
-  };
-
-  // Get selected backend
-  const selectedVisionBackend = config.vision?.backend || 'gemini';
-
-  // Expand environment variables for vision backends
-  if (config.vision) {
-    for (const backend of ['claude', 'openai', 'gemini']) {
-      if (config.vision[backend]?.api_key) {
-        const originalValue = config.vision[backend].api_key;
-        const expanded = expandEnvVar(originalValue);
-
-        // Convert snake_case to camelCase for TypeScript compatibility
-        config.vision[backend].apiKey = expanded;
-        delete config.vision[backend].api_key;
-
-        // Only raise error if this is the selected backend and key is missing
-        if (backend === selectedVisionBackend && !expanded) {
-          const envVarName = typeof originalValue === 'string' && originalValue.startsWith('${')
-            ? originalValue.slice(2, -1)
-            : originalValue;
-          throw new Error(
-            `Environment variable '${envVarName}' for vision backend not set.\n` +
-            `Please add '${envVarName}=your-key' to your .env file,\n` +
-            `or choose a different backend in config/settings.yaml`
-          );
-        }
-      }
-    }
-  }
-
-  return config;
-}
 
 /**
  * Main async function.
@@ -118,11 +67,11 @@ Before running:
 
   // Load configuration
   const configPath = path.join(projectRoot, 'config', 'settings.yaml');
-  const config = loadConfig(configPath);
+  const config = loadSettingsFromFile(configPath);
 
   // Setup logging
-  const logDir = path.join(projectRoot, config.logging.log_dir);
-  const screenshotDir = path.join(projectRoot, config.logging.screenshot_dir);
+  const logDir = path.join(projectRoot, config.logging.logDir);
+  const screenshotDir = path.join(projectRoot, config.logging.screenshotDir);
   setupLogging(config.logging.level, logDir);
 
   const logger = createLogger('Main');
@@ -155,10 +104,10 @@ Before running:
     logger.info('Initializing components...');
 
     const browserConfig: BrowserConfig = {
-      cdpUrl: config.browser.cdp_url,
+      cdpUrl: config.browser.cdpUrl,
       headless: config.browser.headless,
       timeout: config.browser.timeout,
-      screenshotOnError: config.browser.screenshot_on_error,
+      screenshotOnError: config.browser.screenshotOnError,
     };
 
     // Initialize ProductAnalyzer with vision settings
@@ -239,12 +188,12 @@ Before running:
 
       // Step 5: Create ad
       logger.info('Step 5: Creating ad on kleinanzeigen.de...');
-      const automator = new KleinanzeigenAutomator(page, config.kleinanzeigen.base_url);
+      const automator = new KleinanzeigenAutomator(page, config.kleinanzeigen.baseUrl);
 
       await automator.createAd(
         adContent,
         productInfo.imagePaths,
-        config.kleinanzeigen.draft_mode,
+        config.kleinanzeigen.draftMode,
         autoConfirm
       );
 

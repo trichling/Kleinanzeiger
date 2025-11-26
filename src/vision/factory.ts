@@ -4,9 +4,21 @@
 
 import { VisionAnalyzer } from './base.js';
 import { VisionConfig } from './models.js';
+import type { VisionSettings } from '../settings/models.js';
 import { createLogger } from '../utils/logger.js';
 
 const logger = createLogger('VisionAnalyzerFactory');
+
+/**
+ * Normalize VisionSettings to VisionConfig format.
+ * VisionSettings has optional apiKey, but VisionConfig requires it.
+ * This ensures the config has the required format for analyzers.
+ */
+function normalizeConfig(config: VisionConfig | VisionSettings): VisionConfig {
+  // If it's already VisionConfig (has required apiKey), return as-is
+  // Otherwise, cast to VisionConfig - runtime validation happens in analyzers
+  return config as VisionConfig;
+}
 
 /**
  * Factory class for creating vision analyzer instances.
@@ -18,8 +30,9 @@ export class VisionAnalyzerFactory {
   /**
    * Create a vision analyzer instance with dynamic imports.
    */
-  static async create(backend: string, config: VisionConfig): Promise<VisionAnalyzer> {
+  static async create(backend: string, config: VisionConfig | VisionSettings): Promise<VisionAnalyzer> {
     const backendLower = backend.toLowerCase();
+    const normalizedConfig = normalizeConfig(config);
 
     logger.info(`Creating ${backendLower} vision analyzer`);
 
@@ -27,19 +40,19 @@ export class VisionAnalyzerFactory {
       switch (backendLower) {
         case 'gemini': {
           const { GeminiVisionAnalyzer } = await import('./geminiAnalyzer.js');
-          return new GeminiVisionAnalyzer(config);
+          return new GeminiVisionAnalyzer(normalizedConfig);
         }
         case 'claude': {
           const { ClaudeVisionAnalyzer } = await import('./claudeAnalyzer.js');
-          return new ClaudeVisionAnalyzer(config);
+          return new ClaudeVisionAnalyzer(normalizedConfig);
         }
         case 'openai': {
           const { OpenAIVisionAnalyzer } = await import('./openaiAnalyzer.js');
-          return new OpenAIVisionAnalyzer(config);
+          return new OpenAIVisionAnalyzer(normalizedConfig);
         }
         case 'blip2': {
           const { BLIP2VisionAnalyzer } = await import('./blip2Analyzer.js');
-          return new BLIP2VisionAnalyzer(config);
+          return new BLIP2VisionAnalyzer(normalizedConfig);
         }
         default: {
           const available = ['gemini', 'claude', 'openai', 'blip2'];
@@ -73,7 +86,7 @@ export class VisionAnalyzerFactory {
    *   }
    * }
    */
-  static async createFromSettings(settings: { vision: VisionConfig }): Promise<VisionAnalyzer> {
+  static async createFromSettings(settings: { vision: VisionConfig | VisionSettings }): Promise<VisionAnalyzer> {
     const visionSettings = settings.vision;
     const backend = visionSettings.backend || 'gemini';
 

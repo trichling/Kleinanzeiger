@@ -92,15 +92,12 @@ export async function startAnalysis(folderPath: string, images: ImageInfo[]): Pr
     showError(false);
 
     try {
-        // Load settings from localStorage
-        const settingsJson = localStorage.getItem('kleinanzeiger-settings');
-        const settings = settingsJson ? JSON.parse(settingsJson) : { visionBackend: 'gemini', apiKey: '' };
+        // Load settings from localStorage using browser-safe loader
+        const { loadSettingsFromStorage } = await import('../../../settings/browser.js');
+        const settings = loadSettingsFromStorage();
 
-        // Call IPC handler to analyze images with settings
-        const result = await (window as any).electronAPI.analyzeImages(folderPath, {
-            visionBackend: settings.visionBackend,
-            apiKey: settings.apiKey
-        });
+        // Call IPC handler to analyze images with vision settings
+        const result = await (window as any).electronAPI.analyzeImages(folderPath, settings.vision);
 
         if (!result.success) {
             throw new Error(result.error || 'Analysis failed');
