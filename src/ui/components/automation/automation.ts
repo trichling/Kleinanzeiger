@@ -21,24 +21,27 @@ export function setupAutomationPanel(
     // Use event delegation
     container?.addEventListener('click', (event) => {
         const target = event.target as HTMLElement;
+        const button = target.closest('button');
 
-        if (target.id === 'backFromAutomationButton') {
+        if (!button) return;
+
+        if (button.id === 'backFromAutomationButton') {
             onBack();
         }
 
-        if (target.id === 'startBraveButton') {
+        if (button.id === 'startBraveButton') {
             handleStartBrave();
         }
 
-        if (target.id === 'refreshStatusButton') {
+        if (button.id === 'refreshStatusButton') {
             handleRefreshStatus();
         }
 
-        if (target.id === 'clearLogButton') {
+        if (button.id === 'clearLogButton') {
             clearLog();
         }
 
-        if (target.id === 'createAdButton') {
+        if (button.id === 'createAdButton') {
             if (currentAdContent && currentImagePaths.length > 0) {
                 handleCreateAd(onCreateAd);
             }
@@ -65,7 +68,9 @@ export function prepareAutomation(adContent: AdContent, imagePaths: string[]): v
     if (summaryImages) summaryImages.textContent = `${imagePaths.length} images`;
 
     addLog('info', 'Ad content loaded, ready for automation');
-    checkBrowserStatus();
+
+    // Auto-check browser status when page opens (small delay to ensure DOM is ready)
+    setTimeout(() => checkBrowserStatus(), 100);
 }
 
 /**
@@ -108,22 +113,13 @@ async function checkBrowserStatus(): Promise<void> {
  */
 function handleBrowserConnected(): void {
     isConnected = true;
-    updateBrowserStatus('connected', 'Browser connected');
+    updateBrowserStatus('connected', 'Browser Connected');
 
-    const startButton = document.getElementById('startBraveButton');
-    startButton?.classList.add('hidden');
+    // Hide step 1 content (keep status visible), show step 2
+    document.getElementById('step1Content')?.classList.add('hidden');
+    document.getElementById('step2Card')?.classList.remove('hidden');
 
-    // Enable create ad button if we have content
-    const createButton = document.getElementById('createAdButton') as HTMLButtonElement;
-    if (createButton && currentAdContent) {
-        createButton.disabled = false;
-    }
-
-    // Update instruction steps
-    updateStepStatus('step1', 'completed');
-    updateStepStatus('step2', 'active');
-
-    addLog('success', 'Browser connected successfully');
+    addLog('success', 'Browser connected successfully - ready to create ad');
 }
 
 /**
@@ -131,21 +127,11 @@ function handleBrowserConnected(): void {
  */
 function handleBrowserDisconnected(): void {
     isConnected = false;
-    updateBrowserStatus('disconnected', 'Browser not running');
+    updateBrowserStatus('disconnected', 'Browser Not Connected');
 
-    const startButton = document.getElementById('startBraveButton');
-    startButton?.classList.remove('hidden');
-
-    // Disable create ad button
-    const createButton = document.getElementById('createAdButton') as HTMLButtonElement;
-    if (createButton) {
-        createButton.disabled = true;
-    }
-
-    // Update instruction steps
-    updateStepStatus('step1', 'active');
-    updateStepStatus('step2', '');
-    updateStepStatus('step3', '');
+    // Show step 1 content, hide step 2
+    document.getElementById('step1Content')?.classList.remove('hidden');
+    document.getElementById('step2Card')?.classList.add('hidden');
 
     addLog('warning', 'Browser not connected. Please start Brave with CDP enabled.');
 }
@@ -154,23 +140,28 @@ function handleBrowserDisconnected(): void {
  * Update browser status indicator
  */
 function updateBrowserStatus(status: 'connected' | 'disconnected' | 'checking', text: string): void {
-    const indicator = document.getElementById('browserStatus');
-    if (indicator) {
-        indicator.className = `status-indicator ${status}`;
-        const statusText = indicator.querySelector('.status-text');
-        if (statusText) {
-            statusText.textContent = text;
-        }
-    }
-}
+    const statusText = document.getElementById('statusText');
+    const statusIcon = document.getElementById('statusIconContent');
+    const statusCard = document.querySelector('.status-card');
 
-/**
- * Update instruction step status
- */
-function updateStepStatus(stepId: string, status: 'active' | 'completed' | ''): void {
-    const step = document.getElementById(stepId);
-    if (step) {
-        step.className = `instruction-step ${status}`;
+    if (statusText) {
+        statusText.textContent = text;
+    }
+
+    if (statusIcon) {
+        if (status === 'connected') {
+            statusIcon.textContent = '✓';
+            statusCard?.classList.add('status-connected');
+            statusCard?.classList.remove('status-disconnected', 'status-checking');
+        } else if (status === 'disconnected') {
+            statusIcon.textContent = '✕';
+            statusCard?.classList.add('status-disconnected');
+            statusCard?.classList.remove('status-connected', 'status-checking');
+        } else {
+            statusIcon.textContent = '⏳';
+            statusCard?.classList.add('status-checking');
+            statusCard?.classList.remove('status-connected', 'status-disconnected');
+        }
     }
 }
 
@@ -185,7 +176,8 @@ async function handleStartBrave(): Promise<void> {
 
         if (result.success) {
             addLog('success', 'Brave started successfully');
-            // Wait a moment for browser to fully start
+            addLog('info', 'Checking browser connection...');
+            // Wait a moment for browser to fully start, then auto-check
             setTimeout(() => checkBrowserStatus(), 2000);
         } else {
             addLog('error', `Failed to start Brave: ${result.error}`);
@@ -224,7 +216,6 @@ async function handleCreateAd(onCreateAd: (adContent: AdContent, imagePaths: str
         createButton.textContent = 'Creating Ad...';
     }
 
-    updateStepStatus('step3', 'active');
     addLog('info', 'Starting ad creation automation...');
 
     try {
@@ -237,7 +228,6 @@ async function handleCreateAd(onCreateAd: (adContent: AdContent, imagePaths: str
         );
 
         if (result.success) {
-            updateStepStatus('step3', 'completed');
             addLog('success', 'Ad created successfully!');
             addLog('info', `Current page: ${result.adUrl || 'N/A'}`);
             addLog('info', 'Browser kept open - you can review the ad');

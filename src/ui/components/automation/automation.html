@@ -1,75 +1,52 @@
 <div class="automation-container">
-    <h2>Publish Ad Automation</h2>
+    <!-- Back Button -->
+    <button id="backFromAutomationButton" class="back-button">← Back</button>
 
-    <!-- Browser Status Section -->
-    <div class="status-card">
-        <h3>Browser Status</h3>
-        <div class="status-content">
-            <div class="status-indicator" id="browserStatus">
-                <span class="status-dot"></span>
-                <span class="status-text">Checking...</span>
+    <h2>Automate Ad Posting</h2>
+
+    <!-- Step 1: Connect to Browser -->
+    <div class="result-card step-card" id="step1Card">
+        <div class="step-header">
+            <span class="step-badge">Step 1</span>
+            <h3>Connect to Browser</h3>
+        </div>
+        <div class="status-display">
+            <div class="status-icon" id="statusIcon">
+                <span id="statusIconContent">⏳</span>
             </div>
-            <button id="startBraveButton" class="action-button hidden">Start Brave with CDP</button>
-            <button id="refreshStatusButton" class="secondary-button">Refresh Status</button>
+            <div class="status-info">
+                <div class="status-label">Browser Status</div>
+                <div class="status-text-large" id="statusText">Checking...</div>
+            </div>
+            <button id="refreshStatusButton" class="icon-button" title="Refresh Status">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" width="20" height="20">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+            </button>
+        </div>
+        <div id="step1Content">
+            <p>Click the button below to start Brave with remote debugging enabled</p>
+            <button id="startBraveButton" class="primary-button">Start Brave with CDP</button>
         </div>
     </div>
 
-    <!-- Instructions Section -->
-    <div class="instructions-card" id="instructionsCard">
-        <h3>Instructions</h3>
-        <ol class="instruction-list">
-            <li id="step1" class="instruction-step">
-                <span class="step-number">1</span>
-                <div class="step-content">
-                    <strong>Start Brave Browser</strong>
-                    <p>Click "Start Brave with CDP" to launch the browser with remote debugging enabled.</p>
-                </div>
-            </li>
-            <li id="step2" class="instruction-step">
-                <span class="step-number">2</span>
-                <div class="step-content">
-                    <strong>Log in to Kleinanzeigen</strong>
-                    <p>Navigate to kleinanzeigen.de and log in to your account.</p>
-                </div>
-            </li>
-            <li id="step3" class="instruction-step">
-                <span class="step-number">3</span>
-                <div class="step-content">
-                    <strong>Start Automation</strong>
-                    <p>Click "Create Ad" below to start the automated ad posting process.</p>
-                </div>
-            </li>
-        </ol>
-    </div>
-
-    <!-- Ad Summary Section -->
-    <div class="ad-summary-card" id="adSummaryCard">
-        <h3>Ad Summary</h3>
-        <div class="summary-content">
-            <div class="summary-field">
-                <label>Title:</label>
-                <span id="summaryTitle">-</span>
-            </div>
-            <div class="summary-field">
-                <label>Price:</label>
-                <span id="summaryPrice">-</span>
-            </div>
-            <div class="summary-field">
-                <label>Category:</label>
-                <span id="summaryCategory">-</span>
-            </div>
-            <div class="summary-field">
-                <label>Images:</label>
-                <span id="summaryImages">-</span>
-            </div>
+    <!-- Step 2: Create Ad (hidden until browser connected) -->
+    <div class="result-card step-card hidden" id="step2Card">
+        <div class="step-header">
+            <span class="step-badge">Step 2</span>
+            <h3>Create Ad</h3>
         </div>
+        <p>Log into kleinanzeigen.de in the Brave window, then click the button below to start automation</p>
+        <button id="createAdButton" class="primary-button">Create Ad</button>
     </div>
 
-    <!-- Automation Log Section -->
-    <div class="log-card">
+    <!-- Automation Log -->
+    <div class="result-card">
         <div class="log-header">
-            <h3>Automation Log</h3>
-            <button id="clearLogButton" class="clear-button">Clear</button>
+            <h3>Live Log</h3>
+            <button id="clearLogButton" class="icon-button" title="Clear Log">✕</button>
         </div>
         <div class="log-content" id="logContent">
             <div class="log-entry log-info">
@@ -77,11 +54,5 @@
                 <span class="log-message">Waiting to start automation...</span>
             </div>
         </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="button-group">
-        <button id="backFromAutomationButton" class="secondary-button">← Back</button>
-        <button id="createAdButton" class="primary-button" disabled>Create Ad</button>
     </div>
 </div>
