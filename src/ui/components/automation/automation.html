@@ -1,0 +1,87 @@
+<div class="automation-container">
+    <h2>Publish Ad Automation</h2>
+
+    <!-- Browser Status Section -->
+    <div class="status-card">
+        <h3>Browser Status</h3>
+        <div class="status-content">
+            <div class="status-indicator" id="browserStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">Checking...</span>
+            </div>
+            <button id="startBraveButton" class="action-button hidden">Start Brave with CDP</button>
+            <button id="refreshStatusButton" class="secondary-button">Refresh Status</button>
+        </div>
+    </div>
+
+    <!-- Instructions Section -->
+    <div class="instructions-card" id="instructionsCard">
+        <h3>Instructions</h3>
+        <ol class="instruction-list">
+            <li id="step1" class="instruction-step">
+                <span class="step-number">1</span>
+                <div class="step-content">
+                    <strong>Start Brave Browser</strong>
+                    <p>Click "Start Brave with CDP" to launch the browser with remote debugging enabled.</p>
+                </div>
+            </li>
+            <li id="step2" class="instruction-step">
+                <span class="step-number">2</span>
+                <div class="step-content">
+                    <strong>Log in to Kleinanzeigen</strong>
+                    <p>Navigate to kleinanzeigen.de and log in to your account.</p>
+                </div>
+            </li>
+            <li id="step3" class="instruction-step">
+                <span class="step-number">3</span>
+                <div class="step-content">
+                    <strong>Start Automation</strong>
+                    <p>Click "Create Ad" below to start the automated ad posting process.</p>
+                </div>
+            </li>
+        </ol>
+    </div>
+
+    <!-- Ad Summary Section -->
+    <div class="ad-summary-card" id="adSummaryCard">
+        <h3>Ad Summary</h3>
+        <div class="summary-content">
+            <div class="summary-field">
+                <label>Title:</label>
+                <span id="summaryTitle">-</span>
+            </div>
+            <div class="summary-field">
+                <label>Price:</label>
+                <span id="summaryPrice">-</span>
+            </div>
+            <div class="summary-field">
+                <label>Category:</label>
+                <span id="summaryCategory">-</span>
+            </div>
+            <div class="summary-field">
+                <label>Images:</label>
+                <span id="summaryImages">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Automation Log Section -->
+    <div class="log-card">
+        <div class="log-header">
+            <h3>Automation Log</h3>
+            <button id="clearLogButton" class="clear-button">Clear</button>
+        </div>
+        <div class="log-content" id="logContent">
+            <div class="log-entry log-info">
+                <span class="log-time">Ready</span>
+                <span class="log-message">Waiting to start automation...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="button-group">
+        <button id="backFromAutomationButton" class="secondary-button">← Back</button>
+        <button id="createAdButton" class="primary-button" disabled>Create Ad</button>
+    </div>
+</div>

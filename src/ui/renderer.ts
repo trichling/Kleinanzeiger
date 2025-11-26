@@ -9,6 +9,7 @@ import { setupSettingsPanel } from './components/settings/settings.js';
 import { setupImageSelector, resetImageSelector, type ImageInfo } from './components/imageSelector/imageSelector.js';
 import { setupVisionAnalysis, startAnalysis, resetVisionAnalysis, type ProductInfo } from './components/vision/vision.js';
 import { setupAdContentPanel, displayAdContent } from './components/adContent/adContent.js';
+import { setupAutomationPanel, prepareAutomation, setupAutomationProgressListener } from './components/automation/automation.js';
 
 console.log('Kleinanzeiger renderer process loaded');
 
@@ -19,11 +20,13 @@ function showMainScreen(): void {
   const imageSelectorPanel = document.getElementById('imageSelectorPanel');
   const visionPanel = document.getElementById('visionPanel');
   const adContentPanel = document.getElementById('adContentPanel');
+  const automationPanel = document.getElementById('automationPanel');
 
   settingsPanel?.classList.remove('active');
   imageSelectorPanel?.classList.remove('active');
   visionPanel?.classList.remove('active');
   adContentPanel?.classList.remove('active');
+  automationPanel?.classList.remove('active');
   mainScreen?.classList.add('active');
 }
 
@@ -33,11 +36,13 @@ function showSettingsScreen(): void {
   const imageSelectorPanel = document.getElementById('imageSelectorPanel');
   const visionPanel = document.getElementById('visionPanel');
   const adContentPanel = document.getElementById('adContentPanel');
+  const automationPanel = document.getElementById('automationPanel');
 
   mainScreen?.classList.remove('active');
   imageSelectorPanel?.classList.remove('active');
   visionPanel?.classList.remove('active');
   adContentPanel?.classList.remove('active');
+  automationPanel?.classList.remove('active');
   settingsPanel?.classList.add('active');
 }
 
@@ -47,6 +52,7 @@ function showImageSelectorScreen(): void {
   const imageSelectorPanel = document.getElementById('imageSelectorPanel');
   const visionPanel = document.getElementById('visionPanel');
   const adContentPanel = document.getElementById('adContentPanel');
+  const automationPanel = document.getElementById('automationPanel');
 
   mainScreen?.classList.remove('active');
   settingsPanel?.classList.remove('active');
@@ -64,11 +70,13 @@ function showVisionScreen(): void {
   const imageSelectorPanel = document.getElementById('imageSelectorPanel');
   const visionPanel = document.getElementById('visionPanel');
   const adContentPanel = document.getElementById('adContentPanel');
+  const automationPanel = document.getElementById('automationPanel');
 
   mainScreen?.classList.remove('active');
   settingsPanel?.classList.remove('active');
   imageSelectorPanel?.classList.remove('active');
   adContentPanel?.classList.remove('active');
+  automationPanel?.classList.remove('active');
   visionPanel?.classList.add('active');
 
   // Reset vision state when showing
@@ -81,12 +89,30 @@ function showAdContentScreen(): void {
   const imageSelectorPanel = document.getElementById('imageSelectorPanel');
   const visionPanel = document.getElementById('visionPanel');
   const adContentPanel = document.getElementById('adContentPanel');
+  const automationPanel = document.getElementById('automationPanel');
 
   mainScreen?.classList.remove('active');
   settingsPanel?.classList.remove('active');
   imageSelectorPanel?.classList.remove('active');
   visionPanel?.classList.remove('active');
+  automationPanel?.classList.remove('active');
   adContentPanel?.classList.add('active');
+}
+
+function showAutomationScreen(): void {
+  const mainScreen = document.getElementById('mainScreen');
+  const settingsPanel = document.getElementById('settingsPanel');
+  const imageSelectorPanel = document.getElementById('imageSelectorPanel');
+  const visionPanel = document.getElementById('visionPanel');
+  const adContentPanel = document.getElementById('adContentPanel');
+  const automationPanel = document.getElementById('automationPanel');
+
+  mainScreen?.classList.remove('active');
+  settingsPanel?.classList.remove('active');
+  imageSelectorPanel?.classList.remove('active');
+  visionPanel?.classList.remove('active');
+  adContentPanel?.classList.remove('active');
+  automationPanel?.classList.add('active');
 }
 
 // Event handlers
@@ -147,6 +173,16 @@ function handleBackFromAdContent(): void {
 function handlePublishAd(adContent: any, imagePaths: string[]): void {
   console.log('Publishing ad:', adContent);
   console.log('Images:', imagePaths);
+  prepareAutomation(adContent, imagePaths);
+  showAutomationScreen();
+}
+
+function handleBackFromAutomation(): void {
+  showAdContentScreen();
+}
+
+function handleAdPublished(adContent: any, imagePaths: string[]): void {
+  console.log('Ad published successfully:', adContent);
   showMainScreen();
   showStatusMessage(`✓ Ad published: ${adContent.title}`);
 }
@@ -160,18 +196,25 @@ async function init(): Promise<void> {
     await loadAndRenderComponent('imageSelectorPanel', '/components/imageSelector/imageSelector.html');
     await loadAndRenderComponent('visionPanel', '/components/vision/vision.html');
     await loadAndRenderComponent('adContentPanel', '/components/adContent/adContent.html');
+    await loadAndRenderComponent('automationPanel', '/components/automation/automation.html');
 
     // Setup component event listeners
-    setupMainScreen(handleSettingsClick, handleCreateAdClick);
+    setupMainScreen(
+      handleSettingsClick,
+      handleCreateAdClick,
+      showImageSelectorScreen,
+      showVisionScreen,
+      showAdContentScreen,
+      showAutomationScreen
+    );
     setupSettingsPanel(handleBackFromSettings, handleSettingsSaved);
     setupImageSelector(handleBackFromImageSelector, handleAnalyzeImages);
-
-    // Debug: Check if button exists before setup
-    const testButton = document.getElementById('createAdButton');
-    console.log('Before setupVisionAnalysis - createAdButton exists:', !!testButton);
-
     setupVisionAnalysis(handleBackFromVision, handleCreateAd);
     setupAdContentPanel(handleBackFromAdContent, handlePublishAd);
+    setupAutomationPanel(handleBackFromAutomation, handleAdPublished);
+
+    // Setup automation progress listener
+    setupAutomationProgressListener();
 
     // Show main screen by default
     showMainScreen();

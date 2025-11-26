@@ -6,13 +6,38 @@
 // Setup main screen event listeners
 export function setupMainScreen(
     onSettingsClick: () => void,
-    onCreateAdClick: () => void
+    onCreateAdClick: () => void,
+    onShowImageSelector?: () => void,
+    onShowVision?: () => void,
+    onShowAdContent?: () => void,
+    onShowAutomation?: () => void
 ): void {
-    const settingsButton = document.getElementById('settingsButton');
-    const createAdButton = document.getElementById('createAdButton');
+    const container = document.getElementById('mainScreen');
 
-    settingsButton?.addEventListener('click', onSettingsClick);
-    createAdButton?.addEventListener('click', onCreateAdClick);
+    // Use event delegation for all buttons
+    container?.addEventListener('click', (event) => {
+        const target = event.target as HTMLElement;
+        const button = target.closest('button');
+
+        if (!button) return;
+
+        // Main action buttons
+        if (button.id === 'settingsButton') {
+            onSettingsClick();
+        } else if (button.id === 'createAdButton') {
+            onCreateAdClick();
+        }
+        // Quick action buttons - navigate directly to each screen
+        else if (button.id === 'quickActionImages') {
+            onShowImageSelector?.();
+        } else if (button.id === 'quickActionAnalyze') {
+            onShowVision?.();
+        } else if (button.id === 'quickActionAdContent') {
+            onShowAdContent?.();
+        } else if (button.id === 'quickActionAutomate') {
+            onShowAutomation?.();
+        }
+    });
 }
 
 // Show success message on main screen

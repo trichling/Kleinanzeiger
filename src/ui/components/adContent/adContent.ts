@@ -4,17 +4,7 @@
  */
 
 import type { ProductInfo } from '../../components/vision/vision.js';
-
-interface AdContent {
-    title: string;
-    description: string;
-    price: number;
-    category?: string;
-    subcategory?: string;
-    condition: string;
-    shippingType: string;
-    postalCode: string;
-}
+import type { AdContent } from '../../../vision/models.js';
 
 let currentProductInfo: ProductInfo | null = null;
 let currentImagePaths: string[] = [];

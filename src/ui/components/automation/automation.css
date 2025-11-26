@@ -1,0 +1,367 @@
+/* Automation Component Styles */
+
+.automation-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.automation-container h2 {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+}
+
+/* Status Card */
+.status-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+}
+
+.status-card h3 {
+    margin: 0 0 16px 0;
+    color: #555;
+    font-size: 1.1em;
+}
+
+.status-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #999;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.connected .status-dot {
+    background: #4CAF50;
+}
+
+.status-indicator.disconnected .status-dot {
+    background: #f44336;
+    animation: none;
+}
+
+.status-indicator.checking .status-dot {
+    background: #FF9800;
+}
+
+.status-text {
+    font-weight: 600;
+    color: #333;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Instructions Card */
+.instructions-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+}
+
+.instructions-card h3 {
+    margin: 0 0 20px 0;
+    color: #555;
+    font-size: 1.1em;
+}
+
+.instruction-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.instruction-step {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #e0e0e0;
+    transition: all 0.2s;
+}
+
+.instruction-step.completed {
+    background: #f0f8f0;
+    border-left-color: #4CAF50;
+}
+
+.instruction-step.active {
+    background: #fff8e1;
+    border-left-color: #FF9800;
+}
+
+.step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #e0e0e0;
+    color: #666;
+    border-radius: 50%;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.instruction-step.completed .step-number {
+    background: #4CAF50;
+    color: white;
+}
+
+.instruction-step.active .step-number {
+    background: #FF9800;
+    color: white;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.step-content p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+/* Ad Summary Card */
+.ad-summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+}
+
+.ad-summary-card h3 {
+    margin: 0 0 16px 0;
+    color: #555;
+    font-size: 1.1em;
+}
+
+.summary-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.summary-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.summary-field label {
+    font-weight: 600;
+    color: #777;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-field span {
+    color: #333;
+    font-size: 1em;
+}
+
+/* Log Card */
+.log-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.log-header h3 {
+    margin: 0;
+    color: #555;
+    font-size: 1.1em;
+}
+
+.log-content {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 16px;
+    border-radius: 6px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+    max-height: 400px;
+    overflow-y: auto;
+    line-height: 1.6;
+}
+
+.log-entry {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding: 4px 0;
+}
+
+.log-time {
+    color: #858585;
+    font-weight: 600;
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.log-message {
+    flex: 1;
+}
+
+.log-entry.log-info .log-message {
+    color: #4fc3f7;
+}
+
+.log-entry.log-success .log-message {
+    color: #81c784;
+}
+
+.log-entry.log-warning .log-message {
+    color: #ffb74d;
+}
+
+.log-entry.log-error .log-message {
+    color: #e57373;
+}
+
+/* Buttons */
+.action-button {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.action-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.secondary-button {
+    padding: 12px 24px;
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #555;
+}
+
+.secondary-button:hover {
+    background: #f5f5f5;
+    border-color: #999;
+}
+
+.clear-button {
+    padding: 6px 12px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #666;
+}
+
+.clear-button:hover {
+    background: #e0e0e0;
+}
+
+.primary-button {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.primary-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.primary-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.hidden {
+    display: none !important;
+}
