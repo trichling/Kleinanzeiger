@@ -12,7 +12,7 @@ const logger = createLogger('UIActions');
  * Default delays configuration.
  */
 const DEFAULT_DELAYS: DelaysConfig = {
-  typing: { min: 50, max: 150 },
+  typing: { min: 5, max: 15 },
   click: { min: 100, max: 300 },
   pageLoad: 2000,
 };

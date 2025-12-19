@@ -368,13 +368,13 @@ export class KleinanzeigenAutomator {
   /**
    * Create a complete ad on kleinanzeigen.de.
    */
-  async createAd(adContent: AdContent, imagePaths: string[], saveAsDraft: boolean = true, autoConfirm: boolean = false): Promise<void> {
+  async createAd(adContent: AdContent, imagePaths: string[], saveAsDraft: boolean = true, autoConfirm: boolean = true): Promise<void> {
     logger.info('Starting ad creation process');
 
     // Navigate to post ad page
     await this.navigateToPostAd();
 
-    // Check login status (optional - mainly for debugging)
+    // Check login status (optional - mainly for debugging)s
     try {
       const isLoggedIn = await this.checkLoginStatus();
       if (!isLoggedIn) {

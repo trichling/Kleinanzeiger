@@ -117,7 +117,7 @@ export function registerAutomationHandlers(mainWindow: BrowserWindow): void {
                     adContent,
                     imagePaths,
                     draftMode,
-                    false // autoConfirm - don't auto-confirm in UI mode, let user verify
+                    true
                 );
 
                 sendProgress(mainWindow, 'Ad created successfully!', 'success');
